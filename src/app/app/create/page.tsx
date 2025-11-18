@@ -55,7 +55,7 @@ const CreateTicketPage = () => {
         issue_summary: ticketData.issueSummary,
         issue_details: ticketData.issueDetails,
         status: 'pending', // Default status
-        assigned_technician_id: null, // Explicitly set to null to ensure unassigned
+        assigned_technician_id: undefined, // Set to undefined to ensure unassigned
       });
     },
     onSuccess: (data) => {
