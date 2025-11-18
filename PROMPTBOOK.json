@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "project_name": "JamesTronic",
+    "artifact": "PromptBook",
+    "version": "v1.0.0",
+    "last_updated_ist": "2025-11-05 16:17:47 IST",
+    "owner": "Amair",
+    "description": "Single-source blueprint for generating and maintaining the JamesTronic PWA (Next.js + Supabase). Keep this file at the project root as /PROMPTBOOK.json."
+  },
+  "design_principles": {
+    "ux_quality_bar": [
+      "Feels designed by a senior product designer (not auto-generated).",
+      "Mobile-first, thumb-friendly, fluid up to desktop wide.",
+      "Zero jank: 120–200ms transitions, spring easing, no layout shift.",
+      "Accessible: WCAG AA+, visible focus, prefers-reduced-motion respected.",
+      "Offline-first: installable PWA, queued writes with optimistic UI."
+    ],
+    "ui_system": {
+      "tokens": [
+        "spacing scale (4px base)",
+        "typography scale (1.25 modular)",
+        "radius (6/10/16)",
+        "elevation (0/1/2)"
+      ],
+      "components_must_have": [
+        "Header",
+        "Navigation",
+        "TicketCard",
+        "StatusPill",
+        "ActionBar",
+        "Modal/Sheet",
+        "Toast/Snackbar",
+        "FormField",
+        "EmptyState",
+        "Skeleton"
+      ]
+    },
+    "motion": {
+      "durations_ms": {
+        "fast": 120,
+        "base": 160,
+        "slow": 200
+      },
+      "springs": {
+        "stiffness": 220,
+        "damping": 26
+      },
+      "rules": [
+        "Enter: fade+scale 0.98->1",
+        "Exit: fade+scale 1->0.98",
+        "List reorder: FLIP where possible"
+      ]
+    }
+  },
+  "stack": {
+    "frontend": {
+      "framework": "Next.js (App Router) + React + TypeScript",
+      "state_data": "TanStack Query for server state; minimal local state",
+      "styling": "Tailwind CSS + Radix UI primitives (or equivalent)",
+      "forms": "React Hook Form + Zod",
+      "icons": "Lucide (or similar)"
+    },
+    "backend": {
+      "service": "Supabase (Postgres, Auth, Storage)",
+      "security": "RLS-first design, per-role policies",
+      "migrations": "SQL files committed under /supabase/sql"
+    },
+    "pwa": {
+      "manifest": "/public/manifest.json",
+      "service_worker": "Next PWA plugin or custom SW with workbox",
+      "offline": [
+        "Cache shell",
+        "Cache last N API reads",
+        "Queue writes"
+      ]
+    }
+  },
+  "feature_blueprints": {
+    "booking_flow": [
+      "Customer intake (name, phone, area)",
+      "Device details (category, brand, model, size)",
+      "Issue capture (summary, checklist, free-text)",
+      "Quote & timer start",
+      "Status tracking + history"
+    ],
+    "ticket_actions": [
+      {
+        "key": "edit",
+        "type": "modal_or_route"
+      },
+      {
+        "key": "delete",
+        "type": "confirm_then_soft_delete"
+      },
+      {
+        "key": "whatsapp",
+        "type": "deep_link_wa.me_with_template"
+      },
+      {
+        "key": "call",
+        "type": "tel_link"
+      }
+    ],
+    "statuses": [
+      "pending",
+      "in_progress",
+      "part_required",
+      "ready",
+      "waiting_customer",
+      "failed",
+      "cancelled"
+    ]
+  },
+  "whatsapp": {
+    "manual_link_format": "https://wa.me/{{e164_phone}}?text={{url_encoded_message}}",
+    "phone_rules": [
+      "Store phone in E.164. Example: +919876543210",
+      "Derive e164 from country_code + national if needed"
+    ],
+    "templates_by_status": {
+      "pending": "Hi {{name}}, your ticket {{ticket_id}} is created and marked *Pending*. We will diagnose and update you soon. — JamesTronic",
+      "in_progress": "Update for {{name}} ({{ticket_id}}): Work is *In Progress*. Estimated time: {{eta}}. — JamesTronic",
+      "part_required": "Hi {{name}}, for ticket {{ticket_id}} we need to source a part (*{{part}}*). Estimate: {{eta}}. — JamesTronic",
+      "ready": "Great news {{name}}! Ticket {{ticket_id}} is *Ready*. Please pick up / confirm delivery. — JamesTronic",
+      "waiting_customer": "Reminder {{name}}: Ticket {{ticket_id}} is *Waiting for your response*. Reply to proceed. — JamesTronic",
+      "failed": "Hello {{name}}, ticket {{ticket_id}} repair *failed*. Reason: {{reason}}. We’ll discuss next steps. — JamesTronic",
+      "cancelled": "Hi {{name}}, ticket {{ticket_id}} is *Cancelled*. If this is unexpected, reply here. — JamesTronic"
+    }
+  },
+  "docs_policy": {
+    "backbone_rule": "Every change updates docs. No merge without docs.",
+    "structure": [
+      "/docs/CHANGELOG.md",
+      "/docs/DECISIONS.md",
+      "/docs/UX_GUIDE.md",
+      "/docs/DEV_GUIDE.md",
+      "/docs/API_NOTES.md",
+      "/PROMPTBOOK.json (this file)"
+    ],
+    "changelog_format": "YYYY-MM-DD: [Added/Changed/Fixed/Removed] - short note, PR link"
+  },
+  "supabase_blueprint": {
+    "folders": [
+      "/supabase/sql",
+      "/supabase/policies",
+      "/supabase/seeds"
+    ],
+    "apply_steps": [
+      "Open Supabase -> SQL Editor",
+      "Run files in /supabase/sql in numeric order (000_init.sql, 010_tables.sql, 020_rls.sql, 030_policies.sql)",
+      "Verify RLS & policies; test with non-admin client"
+    ],
+    "tables": [
+      "profiles",
+      "customers",
+      "tickets",
+      "ticket_status_history",
+      "action_logs"
+    ]
+  },
+  "agent_contract": {
+    "goal": "Read this PromptBook first. Then scaffold, implement, wire Supabase, and ship a PWA that passes the UX quality bar.",
+    "phases": [
+      "Phase 0: Create repo JamesTronic, commit this PromptBook.",
+      "Phase 1: Scaffold Next.js App Router + Tailwind + TanStack Query.",
+      "Phase 2: Implement tickets list and TicketCard with ActionBar (edit/delete/whatsapp/call).",
+      "Phase 3: Build intake form + validations + optimistic creation.",
+      "Phase 4: Supabase schema + RLS + server actions wired with server components.",
+      "Phase 5: PWA (manifest, SW, offline queue), perf budgets, a11y pass.",
+      "Phase 6: Docs pass: update all /docs and CHANGELOG."
+    ],
+    "acceptance_checks": [
+      "Lighthouse PWA score ≥ 90 on mobile",
+      "Core Web Vitals good (mobile)",
+      "Keyboard + screen reader usable for critical flows",
+      "Offline create/edit queued and synced later",
+      "WhatsApp deep link opens with correct template prefilled",
+      "tel: link works on mobile"
+    ]
+  }
+}

@@ -32,6 +32,25 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.production
+.env.test
+.env.staging
+
+# logs
+*.log
+server.log
+
+# secrets and sensitive data
+*.key
+*.pem
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.pkcs12
+*.jks
 
 # vercel
 .vercel
@@ -39,3 +58,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backup files
+*~
+*.bak
+*.backup
+*.swp
+*.swo
+*.tmp
+
+# IDE files
+.vscode/*
+.idea/*
+*.sublime-project
+*.sublime-workspace
