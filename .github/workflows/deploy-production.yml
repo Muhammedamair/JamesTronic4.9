@@ -1,0 +1,134 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifact
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+
+      - name: Deploy to Vercel Production
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment to be ready
+          sleep 30
+          
+          # Basic smoke tests
+          echo "Running smoke tests on production deployment..."
+          
+          # Test homepage
+          if ! curl -f --connect-timeout 15 --max-time 45 "$DEPLOYMENT_URL" > /dev/null 2>&1; then
+            echo "❌ Homepage is not accessible"
+            exit 1
+          fi
+          
+          # Test PWA manifest
+          if ! curl -f --connect-timeout 10 --max-time 30 "$DEPLOYMENT_URL/manifest.json" > /dev/null 2>&1; then
+            echo "❌ PWA manifest is not accessible"
+            exit 1
+          fi
+          
+          # Test service worker
+          if ! curl -f --connect-timeout 10 --max-time 30 "$DEPLOYMENT_URL/sw.js" > /dev/null 2>&1; then
+            echo "❌ Service worker is not accessible"
+            exit 1
+          fi
+          
+          # Test API endpoints
+          if ! curl -f --connect-timeout 10 --max-time 30 "$DEPLOYMENT_URL/api/health" > /dev/null 2>&1; then
+            echo "ℹ️ Health check endpoint not found (not a failure for this project)"
+          fi
+          
+          echo "✓ All smoke tests passed"
+
+  rollback:
+    needs: deploy
+    if: failure() || needs.deploy.result == 'failure'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger rollback notification
+        run: |
+          echo "❌ PRODUCTION DEPLOYMENT FAILED"
+          echo "Initiating manual rollback process..."
+          # In a real scenario, you might trigger a rollback to the previous version here
+          # This could involve reverting to a previous deployment or triggering an automated rollback
+          
+  notify-success:
+    needs: deploy
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: '✅ Production deployment successful: ${{ needs.deploy.outputs.deployment-url }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ !cancelled() }}
+        
+      - name: Send Telegram notification
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d text="✅ Production deployment successful!
+          
+          📦 Version: ${{ github.sha }}
+          🌐 URL: ${{ needs.deploy.outputs.deployment-url }}
+          👤 Deployed by: ${{ github.actor }}
+          📅 Time: $(date -u)
+          🔄 Branch: ${{ github.ref_name }}"
+        if: ${{ !cancelled() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != '' }}

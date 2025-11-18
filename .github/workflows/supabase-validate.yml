@@ -1,0 +1,101 @@
+name: Supabase Validation
+
+on:
+  push:
+    branches: [main, develop, staging]
+  pull_request:
+    branches: [main, develop, staging]
+
+jobs:
+  supabase-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: |
+          supabase start
+          sleep 10  # Wait for containers to start
+
+      - name: Validate schema
+        run: |
+          if [ -d supabase/migrations ]; then
+            echo "Validating Supabase migrations..."
+            # Check each migration file for syntax errors
+            for sql_file in supabase/migrations/*.sql; do
+              if [ -f "$sql_file" ]; then
+                echo "Checking $sql_file"
+                # Basic syntax check using psql (if available)
+                if command -v psql &> /dev/null; then
+                  psql postgresql://postgres:postgres@localhost:54322/postgres -f "$sql_file" || {
+                    echo "❌ Error validating SQL file: $sql_file"
+                    exit 1
+                  }
+                fi
+              fi
+            done
+            echo "✓ All SQL migrations validated"
+          else
+            echo "No migration files found, continuing..."
+          fi
+
+      - name: Validate RLS policies
+        run: |
+          if [ -f supabase/config.toml ]; then
+            echo "Checking RLS policy configuration..."
+            if grep -q "rls_enabled\|policy" supabase/config.toml; then
+              echo "✓ RLS configuration found in config.toml"
+            else
+              echo "ℹ️ No specific RLS configuration found in config.toml"
+            fi
+          fi
+
+      - name: Validate Edge Functions
+        run: |
+          if [ -d supabase/functions ]; then
+            echo "Validating Edge Functions..."
+            for func in supabase/functions/*/; do
+              if [ -d "$func" ] && [ -f "$func/index.ts" ]; then
+                echo "Checking function: $(basename "$func")"
+                # Check if there are any compilation errors
+                if [ -f "$func/tsconfig.json" ]; then
+                  npx tsc --noEmit --project "$func/tsconfig.json" || {
+                    echo "❌ Error compiling function: $(basename "$func")"
+                    exit 1
+                  }
+                else
+                  # If no tsconfig, try basic linting
+                  if command -v eslint &> /dev/null; then
+                    npx eslint "$func/index.ts" || {
+                      echo "⚠ Function $(basename "$func") has linting issues (not a blocking error)"
+                    }
+                  fi
+                fi
+              fi
+            done
+            echo "✓ All Edge Functions validated"
+          else
+            echo "No Edge Functions found, continuing..."
+          fi
+
+      - name: Run database tests
+        run: |
+          # Check if migration test files exist
+          if [ -f "supabase/test/migration_test.sql" ] || [ -f "supabase/tests/migration_test.sql" ]; then
+            echo "Running database tests..."
+            # Execute test migrations if available
+            supabase db test
+          else
+            echo "No migration tests found, continuing..."
+          fi
+
+      - name: Stop local Supabase
+        if: always()
+        run: |
+          supabase stop

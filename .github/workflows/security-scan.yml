@@ -1,0 +1,86 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop, staging]
+  pull_request:
+    branches: [main, develop, staging]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Secret Scanning
+        uses: trufflesecurity/truffleHog@v3.66.1
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          extra_args: --only-verified
+
+      - name: Run security audit
+        run: |
+          # Install OWASP dependency check
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip dependency-check-8.4.0-release.zip
+          
+          # Run the security scan
+          ./dependency-check/bin/dependency-check.sh --scan . --format XML --out reports/
+          
+          # Check for vulnerabilities
+          if [ -f "reports/dependency-check-report.xml" ]; then
+            echo "Security report generated"
+            # You can add logic here to fail on critical vulnerabilities
+          fi
+
+      - name: npm audit
+        run: |
+          npm audit --audit-level high
+          # Store audit report
+          npm audit --json > npm-audit-report.json
+
+      - name: Check for exposed secrets
+        run: |
+          SECRET_FOUND=0
+          
+          # Check for common secret patterns in code
+          if grep -r -i "password\|secret\|token\|key\|client_secret\|api_key\|access_key\|secret_key" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.json" --include="*.env" --include="*.yml" --include="*.yaml" . | grep -v ".github/" | grep -v "node_modules/"; then
+            echo "⚠️ Potential secrets found in code"
+            SECRET_FOUND=1
+          fi
+          
+          # Specifically check for the VAPID keys and Supabase keys that should not be in code
+          if grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk\|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" .; then
+            echo "❌ Exposed VAPID or Supabase keys found in code!"
+            SECRET_FOUND=1
+          fi
+          
+          if [ $SECRET_FOUND -eq 1 ]; then
+            exit 1
+          fi
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+      - name: Dependency vulnerability scan
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - run: |
+          npm install --save-dev @microsoft/sbom-tool
+          npx @microsoft/sbom-tool generate -b . -o ./sbom -pn ${{ github.event.repository.name }} -pv ${{ github.sha }} -ps ${{ github.repository_owner }}
+        continue-on-error: true  # SBOM generation can fail safely
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            reports/
+            npm-audit-report.json
+          if-no-files-found: ignore

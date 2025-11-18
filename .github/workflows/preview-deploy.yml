@@ -1,0 +1,113 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: preview-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview-deploy:
+    runs-on: ubuntu-latest
+    environment: preview
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifact
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --preview
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --preview)
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Add deployment comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment ready!\n\n🔗 [Preview URL](${{ steps.deploy.outputs.deployment_url }})\n⏱️ Built at: ${new Date().toISOString()}\n\n_Preview will be available until this PR is closed._`
+            })
+
+      - name: Validate preview deployment
+        run: |
+          # Wait a bit for deployment to be ready
+          sleep 10
+          
+          # Verify that the preview is accessible
+          if curl -f --connect-timeout 10 --max-time 30 "${{ steps.deploy.outputs.deployment_url }}" > /dev/null 2>&1; then
+            echo "✓ Preview deployment is accessible"
+          else
+            echo "❌ Preview deployment is not accessible"
+            exit 1
+          fi
+
+          # Check if PWA manifest is accessible
+          if curl -f --connect-timeout 5 --max-time 15 "${{ steps.deploy.outputs.deployment_url }}/manifest.json" > /dev/null 2>&1; then
+            echo "✓ PWA manifest is accessible in preview"
+          else
+            echo "⚠ PWA manifest not accessible in preview"
+          fi
+
+          # Check if service worker is accessible
+          if curl -f --connect-timeout 5 --max-time 15 "${{ steps.deploy.outputs.deployment_url }}/sw.js" > /dev/null 2>&1; then
+            echo "✓ Service worker is accessible in preview"
+          else
+            echo "⚠ Service worker not accessible in preview"
+          fi
+
+      - name: Report preview status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = context.payload.deployment ? 'success' : 'failure';
+            const desc = context.payload.deployment ? 'Preview deployment successful' : 'Preview deployment failed';
+            
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ job.status }}' === 'success' ? 'success' : 'failure',
+              description: '${{ job.status }}' === 'success' ? 'Preview deployment ready' : 'Preview deployment failed',
+              context: 'Vercel/Preview'
+            })

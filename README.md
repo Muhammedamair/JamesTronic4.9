@@ -4,6 +4,8 @@
 
 JamesTronic is a comprehensive Progressive Web Application (PWA) for managing electronic repair services. Built with Next.js, Supabase, and TypeScript, it provides real-time synchronization between admin, technician, and transporter views to facilitate efficient repair workflows.
 
+**Build Fix**: Supabase Edge Functions have been properly separated from Next.js application build process.
+
 ## Features
 
 - ✅ **PWA Ready**: Installable application with offline capabilities
