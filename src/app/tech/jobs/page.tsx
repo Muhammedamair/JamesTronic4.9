@@ -139,12 +139,15 @@ export default function TechnicianJobsPage() {
     staleTime: 0, // Data is considered stale immediately for real-time updates
     refetchInterval: 30000, // 30-second polling interval as fallback
     refetchOnWindowFocus: true, // Refresh when user returns to tab
-    onSuccess: (data) => {
-      // Update the Zustand store with the fetched tickets
-      console.log(`Updating store with ${data.length} tickets`);
-      setTickets(data);
-    },
   });
+
+  // Handle success and update the Zustand store with the fetched tickets
+  useEffect(() => {
+    if (!isLoadingTickets && fetchedTickets) {
+      console.log(`Updating store with ${fetchedTickets.length} tickets`);
+      setTickets(fetchedTickets);
+    }
+  }, [isLoadingTickets, fetchedTickets, setTickets]);
 
   // Update loading and error states
   useEffect(() => {
@@ -215,7 +218,7 @@ export default function TechnicianJobsPage() {
             schema: 'public',
             table: 'tickets'
           },
-          (payload) => {
+          (payload: any) => {
             console.log('Realtime change detected for all tickets:', payload);
             const { eventType, oldRecord, newRecord } = payload;
 
@@ -313,7 +316,7 @@ export default function TechnicianJobsPage() {
       deviceBrand: ticket.brand || '',
       deviceModel: ticket.model || '',
       issueSummary: ticket.issue_summary,
-      issueDetails: ticket.issue_details,
+      issueDetails: ticket.issue_summary,
       status: ticket.status,
       statusReason: ticket.status_reason,
       createdAt: ticket.created_at,
@@ -448,7 +451,7 @@ export default function TechnicianJobsPage() {
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
               <strong className="font-bold">Error! </strong>
-              <span className="block sm:inline">{(error as Error).message}</span>
+              <span className="block sm:inline">{error}</span>
             </div>
           ) : filteredTickets.length === 0 ? (
             <div className="text-center py-12">

@@ -44,7 +44,7 @@ function getWebPushSupportStatus() {
       if (version >= 16.4) {
         // Check if running in standalone mode (PWA)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                             (navigator.standalone === true) ||
+                             ((navigator as any).standalone === true) ||
                              document.referrer.includes('android-app://');
 
         if (isStandalone) {
@@ -80,7 +80,7 @@ function getWebPushSupportStatus() {
   if (isIOS) {
     // Check if running in standalone mode (PWA)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                         (navigator.standalone === true) ||
+                         ((navigator as any).standalone === true) ||
                          document.referrer.includes('android-app://');
 
     if (isStandalone) {

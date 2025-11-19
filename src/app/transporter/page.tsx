@@ -45,12 +45,12 @@ export default function TransporterPortalPage() {
         .select('id')
         .eq('user_id', user.id)
         .single();
-      
+
       if (profileError) {
         console.error('Error fetching profile:', profileError);
         throw new Error(`Failed to fetch transporter profile: ${profileError.message}`);
       }
-      
+
       // Now fetch tickets assigned to this profile ID
       const { data, error: ticketsError } = await supabase
         .from('tickets')
@@ -61,7 +61,7 @@ export default function TransporterPortalPage() {
         `)
         .eq('assigned_transporter_id', profile.id) // Use profile ID, not user ID
         .order('created_at', { ascending: false });
-      
+
       if (ticketsError) throw new Error(`Failed to load tickets: ${ticketsError.message}`);
       return data || [];
     },
@@ -98,7 +98,7 @@ export default function TransporterPortalPage() {
             table: 'tickets',
             filter: `assigned_transporter_id=eq.${profile.id}`
           },
-          (payload) => {
+          (payload: any) => {
             console.log('Realtime change detected for transporter tickets:', payload);
             // Refetch data to ensure consistency
             queryClient.invalidateQueries({ queryKey: ['transporter-tickets', user?.id] });
@@ -161,7 +161,7 @@ export default function TransporterPortalPage() {
       </div>
     );
   }
-  
+
   // This part will only be reached when auth is resolved and there is no user.
   if (!user) {
     // router.push('/login');
@@ -196,12 +196,12 @@ export default function TransporterPortalPage() {
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Welcome to the transporter panel. Handle device pickups and deliveries.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 mb-8">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Pickups</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">View assigned pickup requests</p>
-                  <Button 
+                  <Button
                     onClick={() => document.getElementById('assigned-tickets')?.scrollIntoView({ behavior: 'smooth' })}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
@@ -212,7 +212,7 @@ export default function TransporterPortalPage() {
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Deliveries</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">View assigned delivery requests</p>
-                  <Button 
+                  <Button
                     onClick={() => document.getElementById('assigned-tickets')?.scrollIntoView({ behavior: 'smooth' })}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
@@ -304,13 +304,13 @@ export default function TransporterPortalPage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
-                                <a 
+                                <a
                                   href={`tel:${ticket.customers?.phone_e164}`}
                                   className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                   Call
                                 </a>
-                                <a 
+                                <a
                                   href={`https://wa.me/${ticket.customers?.phone_e164.replace('+', '')}`}
                                   target="_blank"
                                   rel="noopener noreferrer"

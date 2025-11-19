@@ -6,13 +6,13 @@ import { useSupabase } from '@/components/supabase-provider';
 import { createTicketService } from '@/lib/authenticated-service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Clock, CheckCircle, AlertTriangle, List } from 'lucide-react';
@@ -84,7 +84,7 @@ export default function TechnicianDetailPage() {
 
         if (ticketError) throw ticketError;
 
-        const transformedTickets = ticketData.map(ticket => ({
+        const transformedTickets = ticketData.map((ticket: any) => ({
           ...ticket,
           customer: ticket.customers,
         }));
@@ -105,16 +105,16 @@ export default function TechnicianDetailPage() {
       .channel(`technician-tickets-${id}`)
       .on(
         'postgres_changes',
-        { 
-          event: 'UPDATE', 
-          schema: 'public', 
+        {
+          event: 'UPDATE',
+          schema: 'public',
           table: 'tickets',
           filter: `assigned_technician_id=eq.${id}`
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Realtime update received for ticket:', payload.new);
           const updatedTicket = payload.new as Ticket;
-          
+
           // We need to re-fetch the customer details as they are not in the payload
           const fetchCustomerForTicket = async (ticket: Ticket) => {
             const { data: customerData, error } = await supabase
@@ -122,7 +122,7 @@ export default function TechnicianDetailPage() {
               .select('*')
               .eq('id', ticket.customer_id)
               .single();
-            
+
             if (error) {
               console.error('Error fetching customer for realtime update:', error);
               return { ...ticket, customer: null };
@@ -150,14 +150,14 @@ export default function TechnicianDetailPage() {
   const updateTicketStatus = async (ticketId: string, newStatus: string) => {
     try {
       await ticketService.updateStatus(ticketId, newStatus);
-      
+
       // Update local state
-      setTechnicianTickets(prev => 
-        prev.map(ticket => 
+      setTechnicianTickets(prev =>
+        prev.map(ticket =>
           ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
         )
       );
-      
+
       alert('Ticket status updated successfully!');
     } catch (err) {
       console.error('Error updating ticket status:', err);
@@ -199,10 +199,10 @@ export default function TechnicianDetailPage() {
 
   // Calculate technician stats
   const completedTickets = technicianTickets.filter(t => t.status === 'ready').length;
-  const inProgressTickets = technicianTickets.filter(t => 
+  const inProgressTickets = technicianTickets.filter(t =>
     ['in_progress', 'part_required'].includes(t.status)
   ).length;
-  const pendingTickets = technicianTickets.filter(t => 
+  const pendingTickets = technicianTickets.filter(t =>
     ['pending', 'waiting_customer'].includes(t.status)
   ).length;
 
@@ -249,7 +249,7 @@ export default function TechnicianDetailPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -263,7 +263,7 @@ export default function TechnicianDetailPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">

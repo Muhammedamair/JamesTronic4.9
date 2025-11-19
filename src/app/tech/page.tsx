@@ -6,14 +6,14 @@ import { useSupabase } from '@/components/supabase-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  User, 
-  Package, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  Phone, 
-  MapPin, 
+import {
+  User,
+  Package,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Phone,
+  MapPin,
   Calendar,
   TrendingUp,
   Award,
@@ -63,8 +63,8 @@ export default function TechnicianDashboardPage() {
   const { data: fetchedTickets = [], isLoading: isLoadingTickets, error: fetchError } = useQuery<Ticket[]>({
     queryKey: ['tech-tickets', user?.id],
     queryFn: async () => {
-      if (!ticketService) return [];
-      
+      if (!ticketService || !user) return [];
+
       try {
         // Get the technician's profile ID
         const { data: profile, error: profileError } = await supabase
@@ -100,11 +100,14 @@ export default function TechnicianDashboardPage() {
     },
     enabled: !!user && userRole === 'technician' && !!ticketService,
     staleTime: 30000, // 30 seconds before data is considered stale
-    onSuccess: (data) => {
-      // Update the Zustand store with the fetched tickets
-      setTickets(data);
-    },
   });
+
+  // Update Zustand store when fetched tickets change
+  useEffect(() => {
+    if (fetchedTickets) {
+      setTickets(fetchedTickets);
+    }
+  }, [fetchedTickets, setTickets]);
 
   // Calculate metrics from state with null safety
   const today = new Date().toISOString().split('T')[0];
@@ -144,7 +147,7 @@ export default function TechnicianDashboardPage() {
             table: 'tickets',
             filter: `assigned_technician_id=eq.${profile.id}`
           },
-          (payload) => {
+          (payload: any) => {
             console.log('Realtime change detected for technician tickets:', payload);
             // Refetch data to ensure consistency
             queryClient.invalidateQueries({ queryKey: ['tech-tickets', user?.id] });
@@ -177,7 +180,7 @@ export default function TechnicianDashboardPage() {
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Technician Dashboard</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your repair jobs</p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[...Array(4)].map((_, i) => (
               <Card key={i} className="bg-white dark:bg-gray-800 shadow-md rounded-xl border-0">
@@ -342,23 +345,23 @@ export default function TechnicianDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2 border-[#5B3FFF] text-[#5B3FFF] hover:bg-[#5B3FFF] hover:text-white"
                   onClick={() => router.push('/tech/jobs')}
                 >
                   <Package className="h-4 w-4" />
                   View All Jobs
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2 border-[#5B3FFF] text-[#5B3FFF] hover:bg-[#5B3FFF] hover:text-white"
                 >
                   <Star className="h-4 w-4" />
                   Mark Available
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2 border-[#5B3FFF] text-[#5B3FFF] hover:bg-[#5B3FFF] hover:text-white"
                 >
                   <User className="h-4 w-4" />
@@ -420,7 +423,7 @@ export default function TechnicianDashboardPage() {
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {tickets.slice(0, 5).map((ticket) => (
-                        <motion.tr 
+                        <motion.tr
                           key={ticket.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -449,11 +452,11 @@ export default function TechnicianDashboardPage() {
                             {ticket.issue_summary}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge 
-                              variant={ticket.status.toLowerCase() === 'completed' ? 'default' : 
+                            <Badge
+                              variant={ticket.status.toLowerCase() === 'completed' ? 'default' :
                                       ticket.status.toLowerCase() === 'pending' ? 'secondary' :
                                       'outline'}
-                              className={ticket.status.toLowerCase() === 'completed' ? 'bg-green-500 hover:bg-green-600' : 
+                              className={ticket.status.toLowerCase() === 'completed' ? 'bg-green-500 hover:bg-green-600' :
                                          ticket.status.toLowerCase() === 'pending' ? 'bg-yellow-500 hover:bg-yellow-600' :
                                          'bg-blue-500 hover:bg-blue-600'}
                             >
@@ -484,8 +487,8 @@ export default function TechnicianDashboardPage() {
                   </table>
                   {tickets.length > 5 && (
                     <div className="mt-4 text-center">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => router.push('/tech/jobs')}
                         className="border-[#5B3FFF] text-[#5B3FFF] hover:bg-[#5B3FFF] hover:text-white"
                       >

@@ -75,7 +75,7 @@ export async function subscribeToPushNotifications(options: SubscriptionOptions 
     // Subscribe to push notifications
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey,
+      applicationServerKey: applicationServerKey as any,
     });
 
     // Convert subscription to the required format for the backend

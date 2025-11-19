@@ -112,13 +112,13 @@ const TechJobsPage = () => {
             table: 'tickets',
             filter: `assigned_technician_id=eq.${technicianId}`,
           },
-          (payload) => {
+          (payload: any) => {
             console.log('Tech: Realtime change detected for any ticket.', payload);
             // Check if this change could affect what the technician sees
             // (e.g., ticket was unassigned and now assigned to technician, or status changed on assigned ticket)
             const newAssignedTechId = payload.new?.assigned_technician_id;
             const oldAssignedTechId = payload.old?.assigned_technician_id;
-            
+
             // Invalidate cache if:
             // 1. Ticket was assigned to this technician (new assignment)
             // 2. Ticket was assigned to this technician and is now unassigned or assigned to someone else
@@ -129,7 +129,7 @@ const TechJobsPage = () => {
             queryClient.invalidateQueries({ queryKey: ['tickets', 'technician', user?.id] });
           }
         )
-        .subscribe((status, err) => {
+        .subscribe((status: any, err: any) => {
           if (status === 'SUBSCRIBED') {
             console.log(`Subscribed to ${channelName}`);
           }

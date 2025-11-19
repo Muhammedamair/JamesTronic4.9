@@ -124,8 +124,8 @@ export default function TechnicianManagementPage() {
       if (categoryError) throw categoryError;
 
       // Combine data including category names
-      const usersWithCategory = pendingData?.map(user => {
-        const category = categoryData?.find(cat => cat.id === user.category_id);
+      const usersWithCategory = pendingData?.map((user: PendingUser) => {
+        const category = categoryData?.find((cat: { id: string; name: string }) => cat.id === user.category_id);
         return {
           ...user,
           category_name: category?.name || 'N/A'
@@ -164,7 +164,7 @@ export default function TechnicianManagementPage() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tickets' },
-        (payload) => {
+        (payload: any) => {
           console.log('Realtime change detected, invalidating tickets query:', payload);
           queryClient.invalidateQueries({ queryKey: ['tickets'] });
         }

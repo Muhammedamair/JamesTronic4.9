@@ -67,10 +67,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ onLogout }) => {
 
           {/* Settings Panel */}
           <div className="py-3">
-            <SettingsPanel onLogout={() => {
-              onLogout();
-              setIsOpen(false);
-            }} />
+            <SettingsPanel />
           </div>
 
           {/* Coming Soon Feature */}

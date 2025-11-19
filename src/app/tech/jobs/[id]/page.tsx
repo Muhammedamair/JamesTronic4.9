@@ -120,12 +120,12 @@ const TechJobDetailPage = ({ params }: TechJobDetailPageProps) => {
           table: 'tickets',
           filter: `id=eq.${resolvedParams.id}`
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Tech ticket detail: Realtime change detected, invalidating cache.', payload);
           queryClient.invalidateQueries({ queryKey: ['tickets', 'detail', resolvedParams?.id, user?.id] });
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('Tech ticket detail channel subscription status:', status);
       });
 

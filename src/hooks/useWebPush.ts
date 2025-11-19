@@ -54,7 +54,7 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
       setIsChecking(false);
 
       // Auto-subscribe if requested and conditions are met
-      if (autoSubscribe && supported && Notification.permission === 'granted' && !subscribed) {
+      if (autoSubscribe && supported && Notification.permission === 'granted' && !isSubscribed) {
         await subscribe(subscriptionOptions);
       }
     }

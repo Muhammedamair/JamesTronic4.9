@@ -1,0 +1,22 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "ignoreBuildStep": false,
+  "functions": {
+    "src/**/*.ts": {
+      "includeFiles": "public/**"
+    }
+  },
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-ag

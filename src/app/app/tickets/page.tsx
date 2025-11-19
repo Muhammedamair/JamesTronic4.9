@@ -38,6 +38,27 @@ interface Ticket {
   } | null;
 }
 
+interface RawTicket {
+  id: string;
+  customer_id: string;
+  assigned_technician_id: string | null;
+  device_category: string;
+  brand: string;
+  model: string;
+  issue_summary: string;
+  status: string;
+  created_at: string;
+  customers: {
+    id: string;
+    name: string;
+    phone_e164: string;
+  } | null;
+  profiles: {
+    id: string;
+    full_name: string;
+  } | null;
+}
+
 export default function TicketsPage() {
   const { supabase, user, userRole } = useSupabase();
   const queryClient = useQueryClient();
@@ -62,7 +83,7 @@ export default function TicketsPage() {
       if (error) throw new Error(`Failed to load tickets: ${error.message}`);
 
       // Transform data to match our interface expectations
-      return data.map(ticket => ({
+      return data.map((ticket: RawTicket) => ({
         ...ticket,
         customer: ticket.customers,
         assigned_technician: ticket.profiles
@@ -88,29 +109,29 @@ export default function TicketsPage() {
           schema: 'public',
           table: 'tickets',
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Main Tickets Page: Realtime change detected for ticket', payload);
-          
+
           // Check the old and new states to see if this affects any technician's view
           const newTicket = payload.new;
           const oldTicket = payload.old;
-          
+
           // Get the technician IDs that need to have their queries invalidated
           const affectedTechIds = new Set();
-          
+
           // Add the old technician if ticket was assigned to them (for unassignment)
           if (oldTicket?.assigned_technician_id) {
             affectedTechIds.add(oldTicket.assigned_technician_id);
           }
-          
+
           // Add the new technician if ticket is now assigned to them (for assignment)
           if (newTicket?.assigned_technician_id) {
             affectedTechIds.add(newTicket.assigned_technician_id);
           }
-          
+
           // Invalidate the main tickets query
           queryClient.invalidateQueries({ queryKey: ['tickets'] });
-          
+
           // Invalidate each affected technician's specific query
           affectedTechIds.forEach(techId => {
             queryClient.invalidateQueries({ queryKey: ['tickets', 'technician', techId] });
@@ -147,7 +168,7 @@ export default function TicketsPage() {
 
   const getTechnicianName = (techId: string | null) => {
     if (!techId) return 'Unassigned';
-    const ticket = tickets.find(t => t.id);
+    const ticket = tickets.find((t: Ticket) => t.assigned_technician_id === techId);
     if (ticket?.assigned_technician) {
       return ticket.assigned_technician.full_name;
     }
@@ -238,7 +259,7 @@ export default function TicketsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tickets.map((ticket) => (
+              {tickets.map((ticket: Ticket) => (
                 <TableRow key={ticket.id}>
                   <TableCell className="font-medium">
                     <div>
