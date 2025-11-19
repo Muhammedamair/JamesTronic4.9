@@ -62,6 +62,11 @@ interface Ticket {
   } | null;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 export default function TechnicianManagementPage() {
   const { supabase, user } = useSupabase();
   const queryClient = useQueryClient();
@@ -126,7 +131,7 @@ export default function TechnicianManagementPage() {
 
       // Combine data including category names
       const usersWithCategory = pendingData?.map((user: PendingUser) => {
-        const category = categoryData?.find(cat => cat.id === user.category_id);
+        const category = categoryData?.find((cat: Category) => cat.id === user.category_id);
         return {
           ...user,
           category_name: category?.name || 'N/A'
