@@ -164,7 +164,7 @@ export default function TechnicianDetailPage() {
           }
         }
       )
-      .subscribe((status, err) => {
+      .subscribe((status: any, err: any) => {
         if (status === 'SUBSCRIBED') {
           console.log(`Subscribed to ${channelName}`);
         }
