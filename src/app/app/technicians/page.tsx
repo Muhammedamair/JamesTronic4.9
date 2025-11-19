@@ -388,7 +388,7 @@ export default function TechnicianManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingUsers.map((user) => (
+                {pendingUsers.map((user: PendingUser) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.full_name}</TableCell>
                     <TableCell>
@@ -440,7 +440,7 @@ export default function TechnicianManagementPage() {
                   </p>
                 </div>
               ) : (
-                technicians.map((technician) => (
+                technicians.map((technician: Technician) => (
                   <Link
                     key={technician.id}
                     href={`/app/technicians/${technician.id}`}
@@ -489,7 +489,7 @@ export default function TechnicianManagementPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {unassignedTickets.slice(0, 5).map((ticket) => (
+                    {unassignedTickets.slice(0, 5).map((ticket: Ticket) => (
                       <TableRow key={ticket.id}>
                         <TableCell className="font-medium">
                           <div>
@@ -512,7 +512,7 @@ export default function TechnicianManagementPage() {
                               <SelectValue placeholder="Assign to..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {technicians.map((tech) => (
+                              {technicians.map((tech: Technician) => (
                                 <SelectItem key={tech.id} value={tech.id}>
                                   {tech.full_name}
                                 </SelectItem>
@@ -549,7 +549,7 @@ export default function TechnicianManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {allTickets.map((ticket) => (
+              {allTickets.map((ticket: Ticket) => (
                 <TableRow key={ticket.id}>
                   <TableCell className="font-medium">
                     <div>
@@ -593,7 +593,7 @@ export default function TechnicianManagementPage() {
                           <SelectValue placeholder="Assign..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {technicians.map((tech) => (
+                          {technicians.map((tech: Technician) => (
                             <SelectItem key={tech.id} value={tech.id}>
                               {tech.full_name}
                             </SelectItem>
