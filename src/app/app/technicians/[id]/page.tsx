@@ -141,7 +141,7 @@ export default function TechnicianDetailPage() {
           schema: 'public',
           table: 'tickets',
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Technician Detail Page: Realtime change detected for tickets:', payload);
 
           // Check if this change affects the technician's tickets
