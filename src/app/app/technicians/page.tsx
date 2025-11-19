@@ -170,7 +170,7 @@ export default function TechnicianManagementPage() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tickets' },
-        (payload) => {
+        (payload: any) => {
           console.log('Technician Management: Realtime change detected, invalidating tickets query:', payload);
           queryClient.invalidateQueries({ queryKey: ['tickets'] });
         }
