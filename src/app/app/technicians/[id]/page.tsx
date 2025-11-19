@@ -26,6 +26,23 @@ interface Technician {
   created_at: string;
 }
 
+interface RawTicket {
+  id: string;
+  customer_id: string;
+  assigned_technician_id: string | null;
+  device_category: string;
+  brand: string;
+  model: string;
+  issue_summary: string;
+  status: string;
+  created_at: string;
+  customers: {
+    id: string;
+    name: string;
+    phone_e164: string;
+  };
+}
+
 interface Ticket {
   id: string;
   customer_id: string;
@@ -71,7 +88,7 @@ export default function TechnicianDetailPage() {
 
       if (ticketError) throw ticketError;
 
-      const transformedTickets = ticketData.map(ticket => ({
+      const transformedTickets = ticketData.map((ticket: RawTicket) => ({
         ...ticket,
         customer: ticket.customers,
       }));
@@ -126,22 +143,22 @@ export default function TechnicianDetailPage() {
         },
         (payload) => {
           console.log('Technician Detail Page: Realtime change detected for tickets:', payload);
-          
+
           // Check if this change affects the technician's tickets
           const newTicket = payload.new;
           const oldTicket = payload.old;
-          
+
           // Check if ticket was related to this technician (either assigned or unassigned)
           const oldWasAssigned = oldTicket?.assigned_technician_id === id;
           const newIsAssigned = newTicket?.assigned_technician_id === id;
-          
+
           // Update if: 1) ticket was assigned to this technician (so now unassigned), OR 2) ticket is now assigned to this technician
           if (oldWasAssigned || newIsAssigned) {
             console.log('Ticket assignment change detected for this technician, refetching');
-            
+
             // Refetch tickets to ensure we have the latest data and proper customer info
             refetchTickets();
-            
+
             // Also invalidate the technician's own view so they see the changes in real-time
             queryClient.invalidateQueries({ queryKey: ['tickets', 'technician', id] });
           }
