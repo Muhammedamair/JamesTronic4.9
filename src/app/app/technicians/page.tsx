@@ -125,7 +125,7 @@ export default function TechnicianManagementPage() {
       if (categoryError) throw categoryError;
 
       // Combine data including category names
-      const usersWithCategory = pendingData?.map(user => {
+      const usersWithCategory = pendingData?.map((user: PendingUser) => {
         const category = categoryData?.find(cat => cat.id === user.category_id);
         return {
           ...user,
