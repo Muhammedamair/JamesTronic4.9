@@ -158,12 +158,7 @@ export default function TechnicianJobsPage() {
   }, [isLoadingTickets, fetchError, setLoading, setError]);
 
   // Ensure that the store's tickets are always in sync with the query's data
-  useEffect(() => {
-    if (fetchedTickets && fetchedTickets.length >= 0) { // Check for any valid data
-      console.log(`Syncing fetched data to store: ${fetchedTickets.length} tickets`);
-      setTickets(fetchedTickets);
-    }
-  }, [fetchedTickets?.length, setTickets]); // Only run when the length changes, not the whole array
+  // Removed the potential conflicting useEffect that was causing state updates during render
 
   // Filter tickets based on active tab
   const filteredTickets = tickets.filter(ticket => {

@@ -103,11 +103,7 @@ export default function TechnicianDashboardPage() {
   });
 
   // Update Zustand store when fetched tickets change
-  useEffect(() => {
-    if (fetchedTickets) {
-      setTickets(fetchedTickets);
-    }
-  }, [fetchedTickets, setTickets]);
+  // Removed to prevent conflicting state updates that could cause React error #185
 
   // Calculate metrics from state with null safety
   const today = new Date().toISOString().split('T')[0];
