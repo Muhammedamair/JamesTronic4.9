@@ -21,47 +21,131 @@ export interface SubscriptionOptions {
 
 /**
  * Check if the browser supports web push notifications
+ * Enhanced to include Safari and iOS detection
  */
 export function supportsWebPush(): boolean {
-  return 'serviceWorker' in navigator && 'PushManager' in window;
+  const supportsBasic = 'serviceWorker' in navigator && 'PushManager' in window;
+  if (!supportsBasic) {
+    console.log('Basic Web Push APIs not supported');
+    return false;
+  }
+
+  // Check Safari-specific requirements
+  const userAgent = navigator.userAgent;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+
+  if (isSafari) {
+    // Safari 16.4+ required for Web Push
+    const safariVersionMatch = userAgent.match(/version\/(\d+\.\d+)/i);
+    if (safariVersionMatch) {
+      const version = parseFloat(safariVersionMatch[1]);
+      if (version >= 16.4) {
+        // Safari needs to be in PWA mode (standalone) to support Web Push
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                             ((navigator as any).standalone === true);
+
+        if (!isStandalone) {
+          console.log('Safari requires PWA installation for Web Push');
+          return false;
+        }
+        console.log('Safari 16.4+ in PWA mode supports Web Push');
+        return true;
+      } else {
+        console.log(`Safari ${version} does not support Web Push. Minimum version is 16.4.`);
+        return false;
+      }
+    }
+    console.log('Unable to detect Safari version');
+    return false;
+  }
+
+  if (isIOS) {
+    // iOS needs to be in PWA mode and iOS 16.4+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         ((navigator as any).standalone === true);
+
+    if (!isStandalone) {
+      console.log('iOS requires PWA installation for Web Push');
+      return false;
+    }
+
+    // Check iOS version
+    const iosVersionMatch = userAgent.match(/os (\d+)_(\d+)\s|os\s(\d+)\s/i);
+    if (iosVersionMatch) {
+      const majorVersion = parseInt(iosVersionMatch[1] || iosVersionMatch[3]);
+      if (majorVersion >= 16) {
+        console.log('iOS 16.4+ in PWA mode supports Web Push');
+        return true;
+      } else {
+        console.log(`iOS ${majorVersion} does not support Web Push. Minimum version is 16.4.`);
+        return false;
+      }
+    }
+    console.log('Unable to detect iOS version');
+    return false;
+  }
+
+  // Other browsers (Chrome, Firefox, Edge) generally support Web Push
+  console.log('Web Push is supported in this browser');
+  return true;
 }
 
 /**
  * Request notification permission from the user
+ * Ensures called from a user gesture (tap/click) as required by Safari
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!supportsWebPush()) {
     throw new Error('Web Push is not supported in this browser');
   }
 
-  return Notification.requestPermission();
+  console.log('Requesting notification permission...');
+  const permission = await Notification.requestPermission();
+  console.log('Notification permission result:', permission);
+  return permission;
 }
 
 /**
  * Get the VAPID public key from environment or configuration
  */
 export function getVapidPublicKey(): string | null {
-  return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null;
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null;
+  if (!vapidPublicKey) {
+    console.error('VAPID public key not configured in environment variables');
+  }
+  return vapidPublicKey;
 }
 
 /**
  * Subscribe to push notifications
  */
 export async function subscribeToPushNotifications(options: SubscriptionOptions = {}): Promise<PushSubscription | null> {
+  console.log('Starting subscription process...');
+
   if (!supportsWebPush()) {
     throw new Error('Web Push is not supported in this browser');
   }
 
-  // Check notification permission
-  const permission = await requestNotificationPermission();
-  if (permission !== 'granted') {
-    console.warn('Notification permission not granted');
-    return null;
-  }
-
   try {
+    // Check notification permission
+    let permission = Notification.permission;
+    console.log('Current notification permission:', permission);
+
+    if (permission === 'default') {
+      console.log('Requesting permission...');
+      permission = await requestNotificationPermission();
+    }
+
+    if (permission !== 'granted') {
+      console.warn('Notification permission not granted:', permission);
+      return null;
+    }
+
     // Get service worker registration
+    console.log('Getting service worker registration...');
     const registration = await navigator.serviceWorker.ready;
+    console.log('Service worker ready:', registration);
 
     // Get VAPID public key
     const vapidPublicKey = getVapidPublicKey();
@@ -71,8 +155,10 @@ export async function subscribeToPushNotifications(options: SubscriptionOptions 
 
     // Convert the VAPID public key to the required format
     const applicationServerKey = urlB64ToUint8Array(vapidPublicKey);
+    console.log('Application server key converted');
 
     // Subscribe to push notifications
+    console.log('Subscribing to push notifications...');
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: applicationServerKey as any,
@@ -87,6 +173,8 @@ export async function subscribeToPushNotifications(options: SubscriptionOptions 
         auth: subscriptionJson.keys.auth,
       }
     };
+
+    console.log('Push subscription created:', pushSubscription);
 
     // Get access token
     const token = await getAccessToken();
@@ -104,6 +192,7 @@ export async function subscribeToPushNotifications(options: SubscriptionOptions 
     // The edge function should be deployed at: {SUPABASE_URL}/functions/v1/save-subscription
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/save-subscription`;
 
+    console.log('Saving subscription to server...');
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
@@ -114,19 +203,29 @@ export async function subscribeToPushNotifications(options: SubscriptionOptions 
       body: JSON.stringify({
         ...pushSubscription,
         role: options.role || 'technician', // Default to technician for tech portal
-        device_info: options.device_info || {},
+        device_info: options.device_info || {
+          userAgent: navigator.userAgent,
+          standalone: (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true),
+          platform: navigator.platform,
+          language: navigator.language
+        },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('Failed to save subscription:', response.status, errorText);
       throw new Error(`Failed to save subscription: ${response.status} - ${errorText}`);
     }
 
-    console.log('Push subscription saved successfully');
+    const result = await response.json();
+    console.log('Push subscription saved successfully:', result);
     return pushSubscription;
   } catch (error) {
     console.error('Error subscribing to push notifications:', error);
+    if (error instanceof Error) {
+      throw new Error(`Push subscription failed: ${error.message}`);
+    }
     throw error;
   }
 }
@@ -157,6 +256,40 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
       console.warn('Failed to unsubscribe from push notifications');
     }
 
+    // Remove subscription from server
+    const token = await getAccessToken();
+    if (!token) {
+      console.warn('User not authenticated, unable to remove subscription from server');
+      return success;
+    }
+
+    // Get the Supabase URL from environment
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabaseUrl) {
+      const edgeFunctionUrl = `${supabaseUrl}/functions/v1/unsubscribe`; // Assuming an unsubscribe endpoint exists
+
+      try {
+        const response = await fetch(edgeFunctionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            endpoint: subscription.endpoint
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to remove subscription from server:', response.status);
+        } else {
+          console.log('Subscription removed from server successfully');
+        }
+      } catch (err) {
+        console.error('Error removing subscription from server:', err);
+      }
+    }
+
     return success;
   } catch (error) {
     console.error('Error unsubscribing from push notifications:', error);
@@ -175,7 +308,9 @@ export async function isSubscribedToPush(): Promise<boolean> {
   try {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
-    return subscription !== null;
+    const isSubscribed = subscription !== null;
+    console.log('Current subscription status:', isSubscribed);
+    return isSubscribed;
   } catch (error) {
     console.error('Error checking push subscription status:', error);
     return false;

@@ -2,7 +2,7 @@
 // hooks/useWebPush.ts
 // React hook for managing web push notifications
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   supportsWebPush,
   requestNotificationPermission,
@@ -49,6 +49,10 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
 
         // Get current notification permission
         setPermission(Notification.permission);
+      } else {
+        // If not supported, set to false to avoid hanging loading state
+        setIsSubscribed(false);
+        setPermission(null);
       }
 
       setIsChecking(false);
@@ -60,9 +64,28 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
     }
 
     checkStatus();
-  }, [autoSubscribe, subscriptionOptions]);
 
-  const subscribe = async (options: SubscriptionOptions = {}): Promise<PushSubscription | null> => {
+    // Also add an event listener for service worker updates
+    const handleServiceWorkerStateChange = () => {
+      // Refresh subscription status when service worker changes
+      if (isSupported) {
+        refreshSubscriptionStatus();
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', handleServiceWorkerStateChange);
+    }
+
+    // Cleanup
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('controllerchange', handleServiceWorkerStateChange);
+      }
+    };
+  }, [autoSubscribe, subscriptionOptions, isSupported]); // Add isSupported to dependency array to refresh when support changes
+
+  const subscribe = useCallback(async (options: SubscriptionOptions = {}): Promise<PushSubscription | null> => {
     try {
       const subscription = await subscribeToPushNotifications(options);
       if (subscription) {
@@ -75,9 +98,9 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
       console.error('Error subscribing to push notifications:', error);
       return null;
     }
-  };
+  }, []);
 
-  const unsubscribe = async (): Promise<boolean> => {
+  const unsubscribe = useCallback(async (): Promise<boolean> => {
     try {
       const success = await unsubscribeFromPushNotifications();
       if (success) {
@@ -88,9 +111,9 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
       console.error('Error unsubscribing from push notifications:', error);
       return false;
     }
-  };
+  }, []);
 
-  const requestPermission = async (): Promise<NotificationPermission> => {
+  const requestPermission = useCallback(async (): Promise<NotificationPermission> => {
     try {
       const perm = await requestNotificationPermission();
       setPermission(perm);
@@ -99,17 +122,27 @@ export function useWebPush(options: UseWebPushOptions = {}): UseWebPushReturn {
       console.error('Error requesting notification permission:', error);
       return Notification.permission;
     }
-  };
+  }, []);
 
-  const refreshSubscriptionStatus = async (): Promise<void> => {
+  const refreshSubscriptionStatus = useCallback(async (): Promise<void> => {
     if (isSupported) {
       setIsChecking(true);
-      const subscribed = await isSubscribedToPush();
-      setIsSubscribed(subscribed);
-      setPermission(Notification.permission);
+      try {
+        const subscribed = await isSubscribedToPush();
+        setIsSubscribed(subscribed);
+        setPermission(Notification.permission);
+      } catch (error) {
+        console.error('Error refreshing subscription status:', error);
+        setIsSubscribed(false);
+      } finally {
+        setIsChecking(false);
+      }
+    } else {
+      // If not supported, set appropriate defaults
       setIsChecking(false);
+      setIsSubscribed(false);
     }
-  };
+  }, [isSupported]);
 
   return {
     isSupported,
