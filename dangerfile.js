@@ -23,7 +23,7 @@ export default async function () {
     'next.config.ts'
   ]
 
-  const modifiedSensitiveFiles = danger.git.modified_files.filter(file => 
+  const modifiedSensitiveFiles = danger.git.modified_files.filter(file =>
     sensitiveFiles.some(pattern => new RegExp(pattern.replace('*', '.*')).test(file))
   )
 
@@ -46,10 +46,8 @@ export default async function () {
   const coreFiles = [
     'src/components/supabase-provider.tsx',
     'src/lib/technician-store.ts',
-    'src/app/layout.tsx', 
-    'middleware.ts',
-    'src/hooks/useWebPush.ts',
-    'src/lib/web-push-service.ts'
+    'src/app/layout.tsx',
+    'middleware.ts'
   ]
 
   const modifiedCoreFiles = danger.git.modified_files.filter(file => coreFiles.includes(file))
@@ -58,22 +56,22 @@ export default async function () {
   }
 
   // Check if PR touches PWA files
-  const pwaFiles = danger.git.modified_files.filter(file => 
-    file.includes('sw.js') || 
-    file.includes('manifest.json') || 
+  const pwaFiles = danger.git.modified_files.filter(file =>
+    file.includes('sw.js') ||
+    file.includes('manifest.json') ||
     file.includes('service-worker') ||
     file.includes('pwa')
   )
-  
+
   if (pwaFiles.length > 0) {
     message(`🔧 This PR modifies PWA functionality. Please ensure offline capabilities work correctly.`)
   }
 
   // Check for environment variable changes
-  const envVarChanges = danger.git.modified_files.filter(file => 
+  const envVarChanges = danger.git.modified_files.filter(file =>
     file.includes('.env') || file.includes('env.')
   )
-  
+
   if (envVarChanges.length > 0) {
     fail(`Environment variable files have been modified. These should never be committed with actual values.`)
   }
@@ -83,19 +81,19 @@ export default async function () {
   const fileContents = await Promise.all(
     allModifiedFiles.map(file => danger.github.utils.fileContents(file))
   )
-  
+
   fileContents.forEach((content, index) => {
     if (content) {
       // Check for potential API keys, secrets, etc.
       const possibleSecrets = [
         /(?:^|\s)password(?:\s*[:=]|:)/gi,
-        /(?:^|\s)secret(?:\s*[:=]|:)/gi, 
+        /(?:^|\s)secret(?:\s*[:=]|:)/gi,
         /(?:^|\s)token(?:\s*[:=]|:)/gi,
         /(?:^|\s)key(?:\s*[:=]|:)/gi,
         /^[a-zA-Z0-9+/]{86}==$/gm, // Base64-like strings that might be JWTs
         /^ey[a-zA-Z0-9._-]+\.ey[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/gm // JWT pattern
       ]
-      
+
       possibleSecrets.forEach((pattern, patternIndex) => {
         if (pattern.test(content)) {
           fail(`Possible secret detected in ${allModifiedFiles[index]} at line matching: ${pattern}`)
@@ -105,10 +103,10 @@ export default async function () {
   })
 
   // Check for test files
-  const testFiles = danger.git.modified_files.filter(file => 
+  const testFiles = danger.git.modified_files.filter(file =>
     file.includes('.test.') || file.includes('.spec.') || file.includes('__tests__')
   )
-  
+
   if (danger.git.modified_files.length > 5 && testFiles.length === 0) {
     warn('This PR has many changes but no test modifications. Consider adding tests.')
   }

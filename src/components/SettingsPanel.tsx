@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import WebPushToggle from '@/components/WebPushToggle';
-import { Moon, User, Bell } from 'lucide-react';
+import { User, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
@@ -35,8 +34,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <WebPushToggle role="technician" />
-
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="space-y-0.5">
               <Label htmlFor="email-notifications">Email Notifications</Label>

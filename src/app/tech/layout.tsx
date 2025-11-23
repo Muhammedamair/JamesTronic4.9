@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, Settings, Bell, Menu, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import WebPushToggle from '@/components/WebPushToggle';
 
 // Role-based access for technician view
 export default function TechLayout({
@@ -223,15 +222,6 @@ export default function TechLayout({
                   <div className="flex items-center gap-2 mb-3">
                     <Bell className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium">Notifications</span>
-                  </div>
-
-                  <div className="py-2">
-                    <WebPushToggle
-                      userId={user?.id}
-                      role={role || 'technician'}
-                      checked={false}
-                      onCheckedChange={() => {}}
-                    />
                   </div>
 
                   <div className="flex items-center justify-between py-2">

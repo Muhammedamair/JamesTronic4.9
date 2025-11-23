@@ -4,6 +4,7 @@ import { Viewport } from "next";
 import "./globals.css";
 import SupabaseProvider from "@/components/supabase-provider";
 import ReactQueryProvider from "@/components/react-query-provider";
+import OneSignalInitializer from "@/components/OneSignalInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +46,8 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/vercel.svg" />
-        
-        
+
+
         {/* Preconnect to external resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -56,6 +57,7 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <SupabaseProvider>
+            <OneSignalInitializer />
             {children}
           </SupabaseProvider>
         </ReactQueryProvider>
