@@ -10,10 +10,12 @@ import { getAccessToken } from '@/lib/auth-utils';
 export async function initializeOneSignal(): Promise<void> {
   if (typeof window !== 'undefined' && (window as any).OneSignal) {
     const OneSignal = (window as any).OneSignal;
-    
+
     await OneSignal.init({
       appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || '',
       allowLocalhostAsSecureOrigin: process.env.NODE_ENV === 'development',
+      // Enable logging to help debug domain issues
+      logLevel: process.env.NODE_ENV === 'development' ? 6 : 4, // 6 = DEBUG, 4 = INFO
     });
 
     // Automatically save player ID when subscription changes
@@ -34,7 +36,7 @@ export async function initializeOneSignal(): Promise<void> {
 export async function savePlayerIdToDatabase(playerId: string): Promise<boolean> {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       console.error('Error getting user for OneSignal player ID:', authError);
       return false;
@@ -62,8 +64,8 @@ export async function savePlayerIdToDatabase(playerId: string): Promise<boolean>
  * Send notification to a specific OneSignal player
  */
 export async function sendNotificationToOneSignalPlayer(
-  playerId: string, 
-  title: string, 
+  playerId: string,
+  title: string,
   body: string,
   url?: string,
   data?: Record<string, any>
@@ -103,8 +105,8 @@ export async function sendNotificationToOneSignalPlayer(
  * Send notification to a list of OneSignal players
  */
 export async function sendNotificationToList(
-  playerIds: string[], 
-  title: string, 
+  playerIds: string[],
+  title: string,
   body: string,
   url?: string,
   data?: Record<string, any>
@@ -146,7 +148,7 @@ export async function sendNotificationToList(
 export async function getCurrentUserPlayerId(): Promise<string | null> {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       console.error('Error getting user for OneSignal player ID:', authError);
       return null;
@@ -174,7 +176,7 @@ export async function getCurrentUserPlayerId(): Promise<string | null> {
  * Send ticket assignment notification to technician
  */
 export async function sendTicketAssignmentNotification(
-  technicianId: string, 
+  technicianId: string,
   ticketId: string
 ): Promise<boolean> {
   try {
@@ -209,7 +211,7 @@ export async function sendTicketAssignmentNotification(
  * Send ticket status update notification to technician
  */
 export async function sendTicketStatusUpdateNotification(
-  technicianId: string, 
+  technicianId: string,
   ticketId: string,
   status: string
 ): Promise<boolean> {

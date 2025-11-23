@@ -21,6 +21,7 @@ JamesTronic is a comprehensive Progressive Web Application (PWA) for managing el
 - ✅ **TypeScript**: Full type safety throughout the application
 - ✅ **Animations**: Smooth, performant animations with Framer Motion
 - ✅ **Mobile-Optimized**: Perfect performance on mobile devices with real-time sync
+- ✅ **OneSignal Push Notifications**: Professional real-time updates via OneSignal push notifications
 - ✅ **Domain Deployed**: Live at jamestronic.com with proper DNS configuration
 
 ## Architecture
@@ -33,6 +34,7 @@ JamesTronic is a comprehensive Progressive Web Application (PWA) for managing el
 - **Animations**: Framer Motion
 - **Backend**: Supabase (PostgreSQL, Authentication, Storage, Real-time)
 - **PWA**: next-pwa plugin with custom caching strategy
+- **Push Notifications**: OneSignal SDK for reliable cross-platform notifications
 - **Database**: PostgreSQL with Row Level Security
 
 ## Getting Started
