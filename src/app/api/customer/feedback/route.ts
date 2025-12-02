@@ -2,16 +2,21 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-// Initialize Supabase client using environment variables
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
+// Create a Supabase client instance function
+function getSupabaseClient() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       persistSession: false,
     },
-  }
-);
+  });
+}
 
 // Zod schema for feedback validation
 const feedbackSchema = z.object({
@@ -25,6 +30,8 @@ type FeedbackInput = z.infer<typeof feedbackSchema>;
 
 // Helper function to get customer ID from authenticated user
 async function getCustomerIdFromAuth(token: string) {
+  const supabase = getSupabaseClient();
+
   // Get user session to verify role
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
@@ -70,6 +77,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const supabase = getSupabaseClient();
+
     // Check if the ticket belongs to the authenticated customer
     const { data: ticket, error: ticketError } = await supabase
       .from('tickets')
@@ -97,8 +106,8 @@ export async function POST(request: NextRequest) {
       // Update existing feedback
       const { data, error } = await supabase
         .from('customer_feedback')
-        .update({ 
-          rating, 
+        .update({
+          rating,
           review: review || null,
           created_at: new Date().toISOString()
         })
@@ -117,10 +126,10 @@ export async function POST(request: NextRequest) {
       // Insert new feedback
       const { data, error } = await supabase
         .from('customer_feedback')
-        .insert({ 
-          ticket_id, 
-          rating, 
-          review: review || null 
+        .insert({
+          ticket_id,
+          rating,
+          review: review || null
         })
         .select()
         .single();
