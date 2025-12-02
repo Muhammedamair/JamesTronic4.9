@@ -6,6 +6,12 @@ import { roleResolver } from '@/lib/auth-system/roleResolver';
 import { deviceControlService } from '@/lib/auth-system/deviceControlService';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   // Create Supabase client for server-side requests
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
