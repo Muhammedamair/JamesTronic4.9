@@ -3,16 +3,21 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { assignmentLogger } from '@/lib/utils/assignment-logger';
 
-// Initialize Supabase client using environment variables
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
+// Create a Supabase client instance function
+function getSupabaseClient() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       persistSession: false,
     },
-  }
-);
+  });
+}
 
 // Zod schema for request validation
 const assignTicketSchema = z.object({
@@ -37,6 +42,8 @@ export async function POST(request: NextRequest) {
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    const supabase = getSupabaseClient();
 
     // Get user session to verify role
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
