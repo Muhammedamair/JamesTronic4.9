@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabase } from '@/components/supabase-provider';
-import { createTicketService } from '@/lib/authenticated-service';
+import { useSupabase } from '@/components/shared/supabase-provider';
+import { createTicketService } from '@/lib/services/authenticated-service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,22 +45,7 @@ interface PendingUser {
   category_name?: string;
 }
 
-interface Ticket {
-  id: string;
-  customer_id: string;
-  assigned_technician_id: string | null;
-  device_category: string;
-  brand: string;
-  model: string;
-  issue_summary: string;
-  status: string;
-  created_at: string;
-  customers: {
-    id: string;
-    name: string;
-    phone_e164: string;
-  } | null;
-}
+import { Ticket } from '@/lib/types/ticket';
 
 interface Category {
   id: string;
@@ -199,7 +184,7 @@ export default function TechnicianManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to assign ticket',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -226,7 +211,7 @@ export default function TechnicianManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to unassign ticket',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -303,7 +288,7 @@ export default function TechnicianManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to approve user',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -327,7 +312,7 @@ export default function TechnicianManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to reject user',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -498,8 +483,8 @@ export default function TechnicianManagementPage() {
                       <TableRow key={ticket.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div>{ticket.customers?.name || 'N/A'}</div>
-                            <div className="text-xs text-gray-500">{ticket.customers?.phone_e164}</div>
+                            <div>{ticket.customer?.name || 'N/A'}</div>
+                            <div className="text-xs text-gray-500">{ticket.customer?.phone_e164}</div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -558,8 +543,8 @@ export default function TechnicianManagementPage() {
                 <TableRow key={ticket.id}>
                   <TableCell className="font-medium">
                     <div>
-                      <div>{ticket.customers?.name || 'N/A'}</div>
-                      <div className="text-xs text-gray-500">{ticket.customers?.phone_e164}</div>
+                      <div>{ticket.customer?.name || 'N/A'}</div>
+                      <div className="text-xs text-gray-500">{ticket.customer?.phone_e164}</div>
                     </div>
                   </TableCell>
                   <TableCell>

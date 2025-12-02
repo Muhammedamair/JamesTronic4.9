@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
-import { createTicketService } from '@/lib/authenticated-service';
+import { useSupabase } from '@/components/shared/supabase-provider';
+import { createTicketService } from '@/lib/services/authenticated-service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Clock, CheckCircle, AlertTriangle, List, UserX, UserCheck } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Ticket } from '@/lib/types/ticket';
 
 interface Technician {
   id: string;
@@ -41,22 +42,6 @@ interface RawTicket {
     name: string;
     phone_e164: string;
   };
-}
-
-interface Ticket {
-  id: string;
-  customer_id: string;
-  assigned_technician_id: string | null;
-  device_category: string;
-  brand: string;
-  model: string;
-  issue_summary: string;
-  status: string;
-  created_at: string;
-  customer: {
-    name: string;
-    phone_e164: string;
-  } | null;
 }
 
 export default function TechnicianDetailPage() {

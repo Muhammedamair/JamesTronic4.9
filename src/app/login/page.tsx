@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -29,7 +29,7 @@ export default function LoginPage() {
           .from('categories')
           .select('id, name')
           .order('name');
-        
+
         if (error) {
           console.error('Error fetching categories:', error);
         } else {
@@ -113,8 +113,8 @@ export default function LoginPage() {
             {isSignUpMode ? 'JamesTronic Sign Up' : 'JamesTronic Admin Login'}
           </CardTitle>
           <CardDescription className="text-center">
-            {isSignUpMode 
-              ? 'Create your account to join JamesTronic' 
+            {isSignUpMode
+              ? 'Create your account to join JamesTronic'
               : 'Enter your credentials to access the admin panel'}
           </CardDescription>
         </CardHeader>
@@ -132,7 +132,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -155,7 +155,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select value={userRole} onValueChange={(value: any) => setUserRole(value)}>
@@ -169,7 +169,7 @@ export default function LoginPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {userRole === 'technician' && (
                 <div className="space-y-2">
                   <Label htmlFor="category">Specialization Category</Label>
@@ -190,11 +190,11 @@ export default function LoginPage() {
                   </p>
                 </div>
               )}
-              
+
               <Button className="w-full" onClick={handleSignUp} disabled={loading}>
                 {loading ? 'Creating account...' : 'Sign Up'}
               </Button>
-              
+
               <div className="mt-4 text-center text-sm text-gray-600">
                 Already have an account?{' '}
                 <Button

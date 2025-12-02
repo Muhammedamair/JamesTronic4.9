@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -162,7 +162,7 @@ export default function TransporterDetailPage() {
                     <p className="text-gray-600 dark:text-gray-400">{transporter.full_name}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <Package className="h-5 w-5 text-gray-500 mt-0.5" />
                   <div>
@@ -170,7 +170,7 @@ export default function TransporterDetailPage() {
                     <p className="text-gray-600 dark:text-gray-400">{transporter.role}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
                   <div>

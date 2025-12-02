@@ -9,6 +9,11 @@ import { Textarea } from './textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
 import { BrandLogo } from './brand-logo';
 import { CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ExpectationPanel } from '@/components/shared/expectation-panel';
+import { TransparencyBanner } from '@/components/trust/transparency-banner';
+import { TrustBadges } from '@/components/trust/trust-badges';
+import { SLAPreview } from '@/components/shared/sla-preview';
+import { BookingFlowTracker, useBookingFlowTracking } from '@/components/booking/BookingFlowTracker';
 
 // Device categories with icons
 const deviceCategories = [
@@ -48,10 +53,10 @@ const tvSizes = [
 // Common issues for each category
 const commonIssues = {
   television: [
-    'No Picture', 
-    'No Sound', 
-    'Red Light/Power Issues', 
-    'Power Supply Dead', 
+    'No Picture',
+    'No Sound',
+    'Red Light/Power Issues',
+    'Power Supply Dead',
     'Back Light Problem',
     'Display Broken',
     'Display Lines',
@@ -157,7 +162,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
 
   const getFilteredBrands = () => {
     if (!formData.deviceCategory) return brandOptions;
-    
+
     // In a real implementation, you might have device-specific brand filters
     return brandOptions;
   };
@@ -168,18 +173,18 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
     if (!brandOption) {
       return <BrandLogo brandId={brandId} className={size} />;
     }
-    
+
     return (
       <div className={size}>
-        <img 
-          src={brandOption.logo} 
-          alt={brandOption.name} 
+        <img
+          src={brandOption.logo}
+          alt={brandOption.name}
           className={`${size} object-contain`}
           onError={(e) => {
             // If image fails to load, replace with fallback
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
-            
+
             // Create and append the fallback element
             const fallback = document.createElement('div');
             fallback.className = `flex items-center justify-center ${size}`;
@@ -215,7 +220,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="customerPhone">Phone Number</Label>
                 <Input
@@ -227,7 +232,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="customerArea">Area/Location</Label>
                 <Input
@@ -241,7 +246,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
               </div>
             </div>
           )}
-          
+
           {/* Step 2: Device Information */}
           {step === 2 && (
             <div className="space-y-4">
@@ -265,9 +270,13 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                   ))}
                 </div>
               </div>
-              
+
               {formData.deviceCategory && (
                 <div className="space-y-4">
+                  <div className="mb-4">
+                    <ExpectationPanel deviceCategory={formData.deviceCategory} />
+                  </div>
+
                   <div>
                     <Label htmlFor="brand">Brand</Label>
                     <div className="relative">
@@ -283,14 +292,14 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                             <span className="text-gray-500 dark:text-gray-400">Select brand...</span>
                           )}
                           <span className="ml-2">
-                            {formData.brand 
-                              ? brandOptions.find(b => b.id === formData.brand)?.name 
+                            {formData.brand
+                              ? brandOptions.find(b => b.id === formData.brand)?.name
                               : 'Select brand...'}
                           </span>
                         </div>
                         {showBrandSelector ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </button>
-                      
+
                       {showBrandSelector && (
                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
                           <div className="p-2">
@@ -300,8 +309,8 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                                   key={brand.id}
                                   type="button"
                                   className={`p-2 border rounded flex flex-col items-center ${
-                                    formData.brand === brand.id 
-                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                                    formData.brand === brand.id
+                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
                                       : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                                   }`}
                                   onClick={() => handleBrandSelect(brand.id)}
@@ -316,7 +325,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="model">Model Number</Label>
                     <Input
@@ -327,7 +336,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                       placeholder="Enter model number"
                     />
                   </div>
-                  
+
                   {formData.deviceCategory === 'television' && (
                     <div>
                       <Label htmlFor="size">Screen Size (inches)</Label>
@@ -347,10 +356,12 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
               )}
             </div>
           )}
-          
+
           {/* Step 3: Issue Information */}
           {step === 3 && (
             <div className="space-y-4">
+              <TransparencyBanner />
+
               <div>
                 <Label htmlFor="issueSummary">Issue Summary</Label>
                 <div className="relative">
@@ -364,11 +375,11 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                     </span>
                     {showCommonIssues ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </button>
-                  
+
                   {showCommonIssues && (
                     <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
                       <div className="p-2">
-                        {(commonIssues as any)[formData.deviceCategory] ? 
+                        {(commonIssues as any)[formData.deviceCategory] ?
                           (commonIssues as any)[formData.deviceCategory].map((issue: string, index: number) => (
                             <button
                               key={index}
@@ -399,7 +410,7 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                   />
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="issueDetails">Issue Details</Label>
                 <Textarea
@@ -414,26 +425,41 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <div>
-            {step > 1 && (
-              <Button type="button" variant="outline" onClick={() => setStep(prev => prev - 1)}>
-                Previous
-              </Button>
-            )}
+        <CardFooter className="flex flex-col items-stretch">
+          <div className="flex justify-between mb-4">
+            <div>
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={() => setStep(prev => prev - 1)}>
+                  Previous
+                </Button>
+              )}
+            </div>
+            <div>
+              {step < 3 ? (
+                <Button type="button" onClick={() => setStep(prev => prev + 1)}>
+                  Next
+                </Button>
+              ) : (
+                <Button type="submit">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Submit Ticket
+                </Button>
+              )}
+            </div>
           </div>
-          <div>
-            {step < 3 ? (
-              <Button type="button" onClick={() => setStep(prev => prev + 1)}>
-                Next
-              </Button>
-            ) : (
-              <Button type="submit">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Submit Ticket
-              </Button>
-            )}
-          </div>
+
+          {step === 3 && (
+            <>
+              <SLAPreview deviceCategory={formData.deviceCategory} />
+              <TrustBadges />
+              <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>Your request is not lost.</p>
+                <p>A real technician will be assigned.</p>
+                <p>You will receive timeline updates.</p>
+                <p>You always know what's happening.</p>
+              </div>
+            </>
+          )}
         </CardFooter>
       </form>
     </Card>

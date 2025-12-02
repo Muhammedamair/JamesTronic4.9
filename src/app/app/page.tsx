@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 
 export default function HomePage() {
   const router = useRouter();
@@ -80,7 +80,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-      Dashboard 
+      Dashboard
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -88,7 +88,7 @@ export default function HomePage() {
           <div
             key={card.title}
             onClick={() => router.push(card.href)}
-            className="group bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 
+            className="group bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700
                        transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">

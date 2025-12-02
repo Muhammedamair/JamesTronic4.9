@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Viewport } from "next";
 import "./globals.css";
-import SupabaseProvider from "@/components/supabase-provider";
-import ReactQueryProvider from "@/components/react-query-provider";
-import OneSignalInitializer from "@/components/OneSignalInitializer";
+import SupabaseProvider from "@/components/shared/supabase-provider";
+import ReactQueryProvider from "@/components/shared/react-query-provider";
+import OneSignalInitializer from "@/components/shared/OneSignalInitializer";
+import { CustomerProvider } from "@/components/customer/customer-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,8 +58,10 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <SupabaseProvider>
-            <OneSignalInitializer />
-            {children}
+            <CustomerProvider>
+              <OneSignalInitializer />
+              {children}
+            </CustomerProvider>
           </SupabaseProvider>
         </ReactQueryProvider>
       </body>

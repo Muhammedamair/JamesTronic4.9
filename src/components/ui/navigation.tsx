@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Home, List, User, PlusCircle, Wrench } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 
 interface NavigationProps {
   className?: string;
@@ -16,24 +16,24 @@ const Navigation: React.FC<NavigationProps> = ({ className, onNavigate }) => {
   const pathname = usePathname();
   const { supabase, user } = useSupabase();
   const [userRole, setUserRole] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user) return;
-      
+
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', user.id)
         .single();
-      
+
       if (!error && profile) {
         setUserRole(profile.role);
       } else {
         setUserRole(null);
       }
     };
-    
+
     fetchUserRole();
   }, [user, supabase]);
 
@@ -44,7 +44,7 @@ const Navigation: React.FC<NavigationProps> = ({ className, onNavigate }) => {
     { name: 'Customers', href: '/app/customers', icon: User },
     { name: 'Create Ticket', href: '/app/create', icon: PlusCircle },
   ];
-  
+
   // Add technician and transporter management for admin and staff users
   if (userRole === 'admin' || userRole === 'staff') {
     navItems.push({ name: 'Technicians', href: '/app/technicians', icon: Wrench });
@@ -64,8 +64,8 @@ const Navigation: React.FC<NavigationProps> = ({ className, onNavigate }) => {
             suppressHydrationWarning={true}
             className={cn(
               "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
-              isActive 
-                ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" 
+              isActive
+                ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
                 : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800",
               "text-sm font-medium"
             )}

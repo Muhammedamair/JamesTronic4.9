@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
-import { createTicketService } from '@/lib/authenticated-service';
+import { useSupabase } from '@/components/shared/supabase-provider';
+import { createTicketService } from '@/lib/services/authenticated-service';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { StatusPill } from '@/components/ui/status-pill';
 import { Phone, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { WhatsAppTemplate } from '@/lib/whatsapp-template';
+import { WhatsAppTemplate } from '@/lib/utils/whatsapp-template';
 
 interface TicketDetails {
   id: string;

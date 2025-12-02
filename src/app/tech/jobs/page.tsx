@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,29 +28,10 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createTicketService } from '@/lib/authenticated-service';
-import { WhatsAppTemplate } from '@/lib/whatsapp-template';
-import { useTechnicianStore } from '@/lib/technician-store';
-
-// Define the ticket type with customer data
-interface Ticket {
-  id: string;
-  customer_id: string;
-  assigned_technician_id?: string;
-  device_category: string;
-  brand?: string;
-  model?: string;
-  issue_summary: string;
-  status: string;
-  status_reason?: string;
-  created_at: string;
-  updated_at: string;
-  customer: {
-    name: string;
-    phone_e164: string;
-    area?: string;
-  } | null;
-}
+import { createTicketService } from '@/lib/services/authenticated-service';
+import { WhatsAppTemplate } from '@/lib/utils/whatsapp-template';
+import { useTechnicianStore } from '@/lib/services/technician-store';
+import { Ticket } from '@/lib/types/ticket';
 
 // Define the job detail type
 interface JobDetail {
@@ -310,10 +291,10 @@ export default function TechnicianJobsPage() {
       deviceCategory: ticket.device_category,
       deviceBrand: ticket.brand || '',
       deviceModel: ticket.model || '',
-      issueSummary: ticket.issue_summary,
-      issueDetails: ticket.issue_summary,
+      issueSummary: ticket.issue_summary || '',
+      issueDetails: ticket.issue_summary || '',
       status: ticket.status,
-      statusReason: ticket.status_reason,
+      statusReason: ticket.status_reason || '',
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
       area: ticket.customer?.area

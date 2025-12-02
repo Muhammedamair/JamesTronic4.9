@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function StaffPortalPage() {
@@ -113,24 +113,24 @@ export default function StaffPortalPage() {
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Welcome to the staff panel. Access tickets, customers, and create new services.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Tickets</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">View and manage service tickets</p>
-                  <a 
-                    href="/app/tickets" 
+                  <a
+                    href="/app/tickets"
                     className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
                     View Tickets
                   </a>
                 </div>
-                
+
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Customers</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">Manage customer records</p>
-                  <a 
-                    href="/app/customers" 
+                  <a
+                    href="/app/customers"
                     className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
                     Manage Customers

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardRedirectPage() {
@@ -81,7 +81,7 @@ export default function DashboardRedirectPage() {
 
         if (error) {
           console.error('Error fetching profile:', error);
-          // If there's an error fetching profile and no pending record, 
+          // If there's an error fetching profile and no pending record,
           // they might be a new user without a profile yet, or there's an issue
           setError('Failed to determine user role');
           setCheckingRole(false);

@@ -4,12 +4,12 @@ import React from 'react';
 import { TicketCard } from '@/components/ui/ticket-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSupabase } from '@/components/supabase-provider';
-import { createTicketService, TicketWithCustomer } from '@/lib/authenticated-service';
+import { useSupabase } from '@/components/shared/supabase-provider';
+import { createTicketService, TicketWithCustomer } from '@/lib/services/authenticated-service';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket } from '@/lib/supabase';
+import { Ticket } from '@/lib/types/ticket';
 
 const TechJobsPage = () => {
   const { supabase, user, userRole, isLoading: isAuthLoading } = useSupabase();
@@ -246,7 +246,7 @@ const TechJobsPage = () => {
                   deviceCategory={ticket.device_category}
                   brand={ticket.brand || ''}
                   model={ticket.model || ''}
-                  issueSummary={ticket.issue_summary}
+                  issueSummary={ticket.issue_summary || ''}
                   status={ticket.status}
                   createdAt={ticket.created_at}
                   onUpdateStatus={(status) => updateStatusMutation.mutate({ ticketId: ticket.id, status })}

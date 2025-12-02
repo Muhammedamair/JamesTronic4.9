@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -159,7 +159,7 @@ export default function TransporterManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to assign transporter to ticket',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -183,7 +183,7 @@ export default function TransporterManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to unassign transporter',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -260,7 +260,7 @@ export default function TransporterManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to approve transporter',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });
@@ -284,7 +284,7 @@ export default function TransporterManagementPage() {
       toast({
         title: 'Error',
         description: 'Failed to reject transporter',
-        variant: 'error',
+        variant: 'destructive',
       });
     },
   });

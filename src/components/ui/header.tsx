@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
-import { useSupabase } from '@/components/supabase-provider';
+import { useSupabase } from '@/components/shared/supabase-provider';
 import { useRouter } from 'next/navigation';
 import { Navigation } from './navigation';
 
@@ -35,13 +35,13 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         <Link className="flex items-center gap-2" href="/app" onClick={handleNavigate} suppressHydrationWarning={true}>
           <span className="text-xl font-bold">JamesTronic</span>
         </Link>
-        
+
         {/* Desktop Navigation - now using Navigation component */}
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
           <Navigation onNavigate={handleNavigate} />
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleLogout}
             className="flex items-center gap-2"
           >
@@ -49,22 +49,22 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             Logout
           </Button>
         </nav>
-        
+
         {/* Mobile menu button */}
-        <button 
+        <button
           className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
-      
+
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white dark:bg-gray-900">
           <div className="container py-4 flex flex-col gap-3">
             <Navigation onNavigate={handleNavigate} />
-            <button 
+            <button
               className="block py-2 text-left transition-colors hover:text-foreground/80 text-red-600"
               onClick={handleLogout}
             >
