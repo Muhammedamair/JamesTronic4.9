@@ -9,23 +9,11 @@ const INTERAKT_API_KEY = process.env.INTERAKT_API_KEY;
 const INTERAKT_WHATSAPP_OTP_TEMPLATE_NAME = process.env.INTERAKT_WHATSAPP_OTP_TEMPLATE_NAME;
 const INTERAKT_WHATSAPP_SENDER_PHONE = process.env.INTERAKT_WHATSAPP_SENDER_PHONE;
 
-// Service role key for backend operations
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-// Initialize Supabase client with service role for backend operations
-const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-
 // Helper function to normalize phone to +91 format
 function normalizePhone(phone: string): string {
   // Remove all non-digit characters
   const digitsOnly = phone.replace(/\D/g, '');
-  
+
   // Handle Indian numbers
   if (digitsOnly.length === 10) {
     // 10-digit Indian number, add +91 prefix
@@ -48,7 +36,23 @@ async function checkRateLimit(phone_e164: string, ip: string): Promise<boolean> 
   // For now, just checking basic limits in the database
   // Max 5 OTPs per 15 minutes per phone
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  
+
+  // Initialize Supabase client with service role for backend operations (only when needed)
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing Supabase environment variables');
+    return false; // Fail safe - don't allow if can't verify
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
   const { data, error } = await supabase
     .from('login_otp_requests')
     .select('id')
@@ -170,12 +174,30 @@ export async function POST(req: NextRequest) {
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Hash the OTP for secure storage
     const otp_hash = await bcrypt.hash(otp, 10);
 
     // Calculate expiry time (5 minutes from now)
     const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    // Initialize Supabase client with service role for backend operations
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
     // Insert OTP record into database
     const { error: insertError } = await supabase
@@ -204,7 +226,7 @@ export async function POST(req: NextRequest) {
       await sendOtpViaInterakt(phone_e164, otp, channel);
     } catch (interaktError) {
       console.error('Error sending OTP via Interakt:', interaktError);
-      
+
       // Clean up the OTP record since sending failed
       await supabase
         .from('login_otp_requests')
@@ -212,7 +234,7 @@ export async function POST(req: NextRequest) {
         .eq('phone_e164', phone_e164)
         .eq('otp_hash', otp_hash)
         .eq('consumed_at', null); // Only delete unconsumed ones
-      
+
       return new Response(
         JSON.stringify({ error: 'Failed to send OTP. Please try again.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
