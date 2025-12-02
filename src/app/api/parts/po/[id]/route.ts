@@ -7,11 +7,22 @@ import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { getUserRole } from '@/lib/auth/auth-utils'; // Assuming this contains role helper functions
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Create a Supabase client instance function
+function getSupabaseClient() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 // Zod schema for updating purchase orders
 const updatePoSchema = z.object({
@@ -32,6 +43,8 @@ const updatePoSchema = z.object({
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const supabase = getSupabaseClient();
+
     const { id: poId } = await params;
 
     // Get Supabase session from cookies
@@ -108,6 +121,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const supabase = getSupabaseClient();
+
     const { id: poId } = await params;
 
     // Get Supabase session from cookies

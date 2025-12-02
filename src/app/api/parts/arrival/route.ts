@@ -7,11 +7,22 @@ import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { getUserRole } from '@/lib/auth/auth-utils'; // Assuming this contains role helper functions
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Create a Supabase client instance function
+function getSupabaseClient() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 // Zod schema for creating parts arrivals
 const partsArrivalSchema = z.object({
@@ -29,6 +40,8 @@ const partsArrivalSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
+
     // Get Supabase session from cookies
     const authCookies = await cookies();
     const authCookie = authCookies.get('sb-access-token');
@@ -110,6 +123,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
+
     // Get Supabase session from cookies
     const authCookies = await cookies();
     const authCookie = authCookies.get('sb-access-token');
