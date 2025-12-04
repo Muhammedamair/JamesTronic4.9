@@ -146,22 +146,47 @@ export default function CustomerPortalPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-              <Link href="/app/create?category=television" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <h3 className="font-semibold text-gray-800 dark:text-white">TV Repair</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">All sizes & brands</p>
-              </Link>
-              <Link href="/app/create?category=mobile" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <h3 className="font-semibold text-gray-800 dark:text-white">Mobile Repair</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Smartphones & tablets</p>
-              </Link>
-              <Link href="/app/create?category=laptop" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <h3 className="font-semibold text-gray-800 dark:text-white">Laptop Repair</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">All models supported</p>
-              </Link>
-              <Link href="/app/create?category=microwave" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <h3 className="font-semibold text-gray-800 dark:text-white">Appliances</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Microwave & others</p>
-              </Link>
+              {user ? (
+                // Authenticated user - direct to booking
+                <>
+                  <Link href="/app/create?category=television" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">TV Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">All sizes & brands</p>
+                  </Link>
+                  <Link href="/app/create?category=mobile" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Mobile Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Smartphones & tablets</p>
+                  </Link>
+                  <Link href="/app/create?category=laptop" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Laptop Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">All models supported</p>
+                  </Link>
+                  <Link href="/app/create?category=microwave" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Appliances</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Microwave & others</p>
+                  </Link>
+                </>
+              ) : (
+                // Unauthenticated user - redirect to OTP login
+                <>
+                  <Link href="/login?redirect=/app/create?category=television" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">TV Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">All sizes & brands</p>
+                  </Link>
+                  <Link href="/login?redirect=/app/create?category=mobile" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Mobile Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Smartphones & tablets</p>
+                  </Link>
+                  <Link href="/login?redirect=/app/create?category=laptop" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Laptop Repair</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">All models supported</p>
+                  </Link>
+                  <Link href="/login?redirect=/app/create?category=microwave" className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Appliances</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Microwave & others</p>
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="mt-8 text-center">

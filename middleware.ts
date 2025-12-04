@@ -1,9 +1,6 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { sessionValidator } from '@/lib/auth-system/sessionValidator';
-import { deviceFingerprintGenerator } from '@/lib/auth-system/deviceFingerprint';
-import { roleResolver } from '@/lib/auth-system/roleResolver';
-import { deviceControlService } from '@/lib/auth-system/deviceControlService';
+import { SessionManager } from '@/lib/auth-system/sessionManager';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -12,129 +9,149 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Create Supabase client for server-side requests
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.delete(name);
-        },
-      },
-    }
-  );
+  // Validate session using our new session manager
+  const validationResponse = await SessionManager.validateSession();
 
-  // Get the current user from Supabase auth
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-  // If there's an error getting the user, treat as unauthenticated
-  if (userError || !user) {
-    // Define public routes (no authentication required)
-    const isPublicRoute = request.nextUrl.pathname === '/' ||
-                         request.nextUrl.pathname === '/api/auth/callback' ||
-                         request.nextUrl.pathname.startsWith('/auth/') ||
-                         request.nextUrl.pathname.startsWith('/api/otp') ||
-                         request.nextUrl.pathname.startsWith('/api/webhook');
-
-    if (isPublicRoute) {
-      return NextResponse.next();
-    }
-
-    // For protected routes, redirect to login
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  // Get session token from cookies
-  const token = request.cookies.get('sb-access-token')?.value;
-
-  // Generate device fingerprint
-  let deviceId = 'unknown';
-  try {
-    // Attempt to get device ID from headers or generate new one
-    deviceId = request.headers.get('x-device-id') || await deviceFingerprintGenerator();
-  } catch (error) {
-    console.error('Error generating device fingerprint:', error);
-  }
-
-  // Validate the session using our enterprise auth system
-  let sessionValid = false;
-  let deviceValid = false;
-  let resolvedRole = 'customer'; // Default role
-
-  if (token) {
-    const sessionData = await sessionValidator(token, deviceId);
-    sessionValid = sessionData.isValid;
-    deviceValid = sessionData.deviceValid;
-
-    if (sessionData.isValid && sessionData.userId === user.id) {
-      resolvedRole = sessionData.role;
-    } else {
-      // If session is invalid, try to resolve role from user profile
-      const roleData = await roleResolver(user.id);
-      resolvedRole = roleData.role;
-    }
-  } else {
-    // If no token, just resolve role from user profile
-    const roleData = await roleResolver(user.id);
-    resolvedRole = roleData.role;
-  }
-
-  // Check device validity for restricted roles
-  if ((resolvedRole === 'technician' || resolvedRole === 'transporter') && !deviceValid) {
-    // For technicians and transporters, if device is not valid, force logout
-    console.log(`Device validation failed for user ${user.id} with role ${resolvedRole}`);
-
-    // Update device activity
-    await deviceControlService.updateDeviceActivity(user.id, deviceId);
-
-    // For multi-device attempts on restricted accounts, log the conflict
-    if (resolvedRole === 'technician' || resolvedRole === 'transporter') {
-      const activeDevices = await deviceControlService.getActiveDevicesForUser(user.id);
-      if (activeDevices.length > 0) {
-        // Log the device conflict but don't allow access
-        // Use the public registerDeviceForUser method instead of the private registerDevice method
-        await deviceControlService.registerDeviceForUser(user.id, resolvedRole as any, {
-          userAgent: request.headers.get('user-agent') || undefined,
-          platform: request.headers.get('sec-ch-ua-platform')?.replace(/"/g, '') || undefined,
-          ip: getRealIP(request),
-          location: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined
-        });
+  if (!validationResponse.valid) {
+    // If session is invalid, check if we can refresh it
+    if (validationResponse.error &&
+        (validationResponse.error.includes('expired') || validationResponse.error.includes('Session not found'))) {
+      try {
+        const refreshResponse = await SessionManager.refreshSession();
+        if (!refreshResponse.success) {
+          // If refresh failed, clear cookies and redirect to login
+          const response = NextResponse.redirect(new URL('/login', request.url));
+          response.cookies.set('session_id', '', { maxAge: 0 });
+          response.cookies.set('refresh_token', '', { maxAge: 0 });
+          return response;
+        } else {
+          // If refresh succeeded, continue with the request
+          // Get the updated session data
+          const updatedSessionData = await SessionManager.getSessionData();
+        }
+      } catch (error) {
+        console.error('Session refresh failed:', error);
       }
     }
 
-    // Redirect to login for device conflicts
+    // If still not valid after refresh attempt, redirect to login
+    if (!validationResponse.valid) {
+      // Define public routes (no authentication required)
+      const isPublicRoute = request.nextUrl.pathname === '/' ||
+                           request.nextUrl.pathname === '/api/auth/callback' ||
+                           request.nextUrl.pathname.startsWith('/auth/') ||
+                           request.nextUrl.pathname.startsWith('/api/otp') ||
+                           request.nextUrl.pathname.startsWith('/api/webhook') ||
+                           request.nextUrl.pathname.startsWith('/login') ||
+                           request.nextUrl.pathname.startsWith('/admin/login');
+
+      if (isPublicRoute) {
+        return NextResponse.next();
+      }
+
+      // For protected routes, redirect to appropriate login
+      // For admin routes, redirect to admin login
+      if (request.nextUrl.pathname.startsWith('/admin') ||
+          request.nextUrl.pathname.startsWith('/app')) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/login';
+        return NextResponse.redirect(url);
+      }
+
+      // For all other protected routes, redirect to customer login
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Validate session again after potential refresh
+  const validationResponseAfter = await SessionManager.validateSession();
+
+  // At this point, we have a valid session
+  const sessionData = validationResponseAfter.session;
+  if (!sessionData) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  // Define public routes (no authentication required)
-  const isPublicRoute = request.nextUrl.pathname === '/' ||
-                       request.nextUrl.pathname === '/api/auth/callback' ||
-                       request.nextUrl.pathname.startsWith('/auth/') ||
-                       request.nextUrl.pathname.startsWith('/api/otp') ||
-                       request.nextUrl.pathname.startsWith('/api/webhook');
+  const resolvedRole = sessionData.role;
 
-  // If it's a public route, allow access without authentication
-  if (isPublicRoute) {
-    return NextResponse.next();
+  // Device lock enforcement for technicians and transporters
+  if (resolvedRole === 'technician' || resolvedRole === 'transporter') {
+    // Get device fingerprint from request headers or cookies
+    const deviceFingerprint = request.headers.get('x-device-fingerprint') ||
+                              request.cookies.get('device_fingerprint')?.value;
+
+    if (!deviceFingerprint) {
+      // If no device fingerprint is provided, block access for technicians and transporters
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+
+    // Check device lock against database
+    try {
+      // Use Supabase client with environment variables
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+      const userId = sessionData.userId; // Updated to use userId from session data
+
+      const { data: deviceLock, error: lockError } = await supabase
+        .from('device_lock')
+        .select('device_fingerprint_hash')
+        .eq('user_id', userId)
+        .single();
+
+      if (lockError && lockError.code !== 'PGRST116') { // PGRST116 is 'row not found'
+        console.error('Error checking device lock:', lockError);
+        // For security, block access if there's an error checking device lock
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        return NextResponse.redirect(url);
+      }
+
+      if (deviceLock && deviceLock.device_fingerprint_hash !== deviceFingerprint) {
+        // Device mismatch - potential conflict
+        // Log the device conflict
+        const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                        request.headers.get('x-real-ip') || 'unknown';
+        const userAgent = request.headers.get('user-agent') || 'unknown';
+
+        const { error: conflictError } = await supabase
+          .from('device_lock_conflicts')
+          .insert({
+            user_id: userId,
+            old_device: deviceLock.device_fingerprint_hash,
+            new_device: deviceFingerprint,
+            ip_address: clientIP,
+            user_agent: userAgent,
+            detected_at: new Date().toISOString()
+          });
+
+        if (conflictError) {
+          console.error('Error logging device conflict:', conflictError);
+        }
+
+        // Block access and redirect to login
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      console.error('Error checking device fingerprint:', error);
+      // For security, block access if there's an error checking device fingerprint
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
   }
 
-  // Handle pending users
-  if (user && resolvedRole === 'pending') {
+  // Handle pending users - need to check from profiles table
+  if (resolvedRole === 'pending') {
     if (request.nextUrl.pathname === '/pending-approval' || request.nextUrl.pathname === '/dashboard') {
       // Allow access to pending approval page and dashboard
       return NextResponse.next();
@@ -147,7 +164,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Handle rejected users
-  if (user && resolvedRole === 'rejected') {
+  if (resolvedRole === 'rejected') {
     if (request.nextUrl.pathname === '/rejected' || request.nextUrl.pathname === '/dashboard') {
       return NextResponse.next();
     } else {
@@ -160,11 +177,6 @@ export async function middleware(request: NextRequest) {
 
   // Customer portal routes
   if (request.nextUrl.pathname.startsWith('/customer')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     // Customer role users can access customer routes
     // Also allow admin/staff to access customer routes for management
     if (resolvedRole === 'customer' || resolvedRole === 'admin' || resolvedRole === 'staff') {
@@ -179,11 +191,6 @@ export async function middleware(request: NextRequest) {
 
   // Admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     if (resolvedRole !== 'admin') {
       // Redirect non-admins to dashboard
       const url = request.nextUrl.clone();
@@ -195,11 +202,6 @@ export async function middleware(request: NextRequest) {
 
   // Staff routes
   if (request.nextUrl.pathname.startsWith('/staff')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     if (resolvedRole !== 'staff' && resolvedRole !== 'admin') {
       // Redirect non-staff to dashboard
       const url = request.nextUrl.clone();
@@ -211,21 +213,10 @@ export async function middleware(request: NextRequest) {
 
   // Tech routes
   if (request.nextUrl.pathname.startsWith('/tech')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     if (resolvedRole !== 'technician' && resolvedRole !== 'admin') {
       // Redirect non-technicians to dashboard
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
-    // For technicians, validate device again just to be sure
-    if (resolvedRole === 'technician' && !deviceValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -233,21 +224,10 @@ export async function middleware(request: NextRequest) {
 
   // Transporter routes
   if (request.nextUrl.pathname.startsWith('/transporter')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     if (resolvedRole !== 'transporter' && resolvedRole !== 'admin') {
       // Redirect non-transporters to dashboard
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
-    // For transporters, validate device again just to be sure
-    if (resolvedRole === 'transporter' && !deviceValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -255,11 +235,6 @@ export async function middleware(request: NextRequest) {
 
   // Protected app routes (admin/staff functionality)
   if (request.nextUrl.pathname.startsWith('/app')) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     if (resolvedRole !== 'admin' && resolvedRole !== 'staff') {
       // Redirect non-admin/staff to dashboard
       const url = request.nextUrl.clone();

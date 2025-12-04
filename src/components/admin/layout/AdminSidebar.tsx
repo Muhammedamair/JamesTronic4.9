@@ -71,6 +71,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     );
   }
 
+  // Add device management for admin users only
+  if (userRole === 'admin') {
+    navItems.push(
+      { name: 'Device Management', href: '/app/device-management', icon: BarChart3 }
+    );
+  }
+
   return (
     <aside
       className={cn(
