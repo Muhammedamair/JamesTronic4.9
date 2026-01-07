@@ -53,7 +53,7 @@ jobs:
           fi
           
           # Specifically check for the VAPID keys and Supabase keys that should not be in code
-          if grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk\|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" .; then
+          if grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk\|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" . | grep -v ".github/" | grep -v "node_modules/"; then
             echo "❌ Exposed VAPID or Supabase keys found in code!"
             SECRET_FOUND=1
           fi
