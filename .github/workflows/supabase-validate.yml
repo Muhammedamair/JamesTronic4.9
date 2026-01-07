@@ -23,27 +23,8 @@ jobs:
           supabase start
           sleep 10  # Wait for containers to start
 
-      - name: Validate schema
-        run: |
-          if [ -d supabase/migrations ]; then
-            echo "Validating Supabase migrations..."
-            # Check each migration file for syntax errors
-            for sql_file in supabase/migrations/*.sql; do
-              if [ -f "$sql_file" ]; then
-                echo "Checking $sql_file"
-                # Basic syntax check using psql (if available)
-                if command -v psql &> /dev/null; then
-                  psql postgresql://postgres:postgres@localhost:54322/postgres -f "$sql_file" || {
-                    echo "❌ Error validating SQL file: $sql_file"
-                    exit 1
-                  }
-                fi
-              fi
-            done
-            echo "✓ All SQL migrations validated"
-          else
-            echo "No migration files found, continuing..."
-          fi
+      - name: Validate schema (Implicit in start)
+        run: echo "✓ Schema validation handled by 'supabase start' (migrations applied automatically)"
 
       - name: Validate RLS policies
         run: |
