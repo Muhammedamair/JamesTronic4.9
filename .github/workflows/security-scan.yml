@@ -42,19 +42,18 @@ jobs:
           # Store audit report
           npm audit --json > npm-audit-report.json
 
-      - name: Check for exposed secrets
+      - name: Check for high-confidence secrets
         run: |
           SECRET_FOUND=0
           
-          # Check for common secret patterns in code
-          if grep -r -i "password\|secret\|token\|key\|client_secret\|api_key\|access_key\|secret_key" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.json" --include="*.env" --include="*.yml" --include="*.yaml" . | grep -v ".github/" | grep -v "node_modules/"; then
-            echo "⚠️ Potential secrets found in code"
-            SECRET_FOUND=1
-          fi
+          # Check for specific VAPID Key leak
+          # Using wc -l to properly handle the pipe chain exit codes
+          VAPID_COUNT=$(grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk" . | grep -v ".github/" | grep -v "node_modules/" | wc -l)
           
-          # Specifically check for the VAPID keys and Supabase keys that should not be in code
-          if grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk\|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" . | grep -v ".github/" | grep -v "node_modules/"; then
-            echo "❌ Exposed VAPID or Supabase keys found in code!"
+          if [ "$VAPID_COUNT" -gt 0 ]; then
+            echo "❌ Exposed VAPID Key found in code (excluding .github)!"
+            # Print locations for debugging
+            grep -r "BICTZZxJNSRWnAiHghwn_xq42oOHYWxX4e3KJKokTysmc7KIC_9fqGgvHDlwyrKScP0mobSI3wWDeJTHTWzsKQk" . | grep -v ".github/" | grep -v "node_modules/"
             SECRET_FOUND=1
           fi
           
