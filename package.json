@@ -6,7 +6,7 @@
     "dev": "next dev --webpack --port 3001",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "danger": "danger ci"
   },
@@ -53,6 +53,7 @@
     "@next/bundle-analyzer": "16.1.1",
     "@tailwindcss/postcss": "^4",
     "@types/date-fns": "^2.5.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
