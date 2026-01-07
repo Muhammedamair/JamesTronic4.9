@@ -1,7 +1,6 @@
-// API route for individual purchase orders
-// /Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/parts/po/[id]/route.ts
-
 import { NextRequest } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { cookies } from 'next/headers';
