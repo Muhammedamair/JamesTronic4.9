@@ -267,4 +267,52 @@ export const customerAPI = {
       throw error;
     }
   },
+
+  // Approve a quotation
+  approveQuotation: async (ticketId: string): Promise<void> => {
+    try {
+      const response = await fetch('/api/customer/quotations/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ticket_id: ticketId }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized: Please log in to approve quotation');
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to approve quotation: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error approving quotation:', error);
+      throw error;
+    }
+  },
+
+  // Reject a quotation
+  rejectQuotation: async (ticketId: string): Promise<void> => {
+    try {
+      const response = await fetch('/api/customer/quotations/reject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ticket_id: ticketId }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized: Please log in to reject quotation');
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to reject quotation: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error rejecting quotation:', error);
+      throw error;
+    }
+  },
 };
