@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { pricingEngineDb } from '@/lib/pricing/engine-db'; // Service role client for transaction
+import { getPricingEngineDb } from '@/lib/pricing/engine-db'; // Lazy getter
 
 export async function POST(request: Request) {
     const cookieStore = await cookies();
@@ -53,8 +53,9 @@ export async function POST(request: Request) {
         // A. End-date current active row
         // We set effective_to = new_effective_from (or NOW if immediate)
         const effectiveDate = effective_from ? new Date(effective_from).toISOString() : new Date().toISOString();
+        const db = getPricingEngineDb();
 
-        const { error: updateError } = await pricingEngineDb
+        const { error: updateError } = await db
             .from('pricing_base_rates')
             .update({ effective_to: effectiveDate })
             .eq('city_id', city_id)
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         if (updateError) throw updateError;
 
         // B. Insert new row
-        const { data: newRate, error: insertError } = await pricingEngineDb
+        const { data: newRate, error: insertError } = await db
             .from('pricing_base_rates')
             .insert({
                 city_id,
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         if (insertError) throw insertError;
 
         // C. Audit Log
-        await pricingEngineDb.from('pricing_audit_log').insert({
+        await db.from('pricing_audit_log').insert({
             event_type: 'BASE_RATE_REVISION_CREATED',
             city_id,
             actor_id: user.id,

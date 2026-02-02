@@ -1,12 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Must use service role for transaction isolation if RLS prevents update of other's rows (though here we need it for rigorous timestamps)
+let _pricingDb: ReturnType<typeof createClient> | null = null;
 
-// Use a segregated client for pricing engine operations to ensure consistent timeouts/config
-export const pricingEngineDb = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-    },
-});
+export const getPricingEngineDb = () => {
+    if (_pricingDb) return _pricingDb;
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        // We log instead of throwing at module level to allow build to proceed if this is imported but not called
+        console.warn('Supabase env vars missing for Pricing Engine DB. If this is a build step, it is expected.');
+        return null as any;
+    }
+
+    _pricingDb = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+        },
+    });
+    return _pricingDb;
+};

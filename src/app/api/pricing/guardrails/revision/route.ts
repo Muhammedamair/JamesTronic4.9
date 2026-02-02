@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { pricingEngineDb } from '@/lib/pricing/engine-db'; // Service role for transaction
+import { getPricingEngineDb } from '@/lib/pricing/engine-db'; // Lazy getter
 
 export async function POST(request: Request) {
     const cookieStore = await cookies();
@@ -69,8 +69,8 @@ export async function POST(request: Request) {
     try {
         // 4. Transaction via Service Role
 
-        // A. Fetch current active row
-        const { data: currentRows, error: fetchError } = await pricingEngineDb
+        const db = getPricingEngineDb();
+        const { data: currentRows, error: fetchError } = await db
             .from('pricing_guardrails')
             .select('*')
             .eq('city_id', city_id)
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         // B. End-date current active row
         const effectiveDate = new Date().toISOString(); // Imposed Immediate Effect
 
-        const { error: updateError } = await pricingEngineDb
+        const { error: updateError } = await db
             .from('pricing_guardrails')
             .update({ effective_to: effectiveDate })
             .eq('city_id', city_id)
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         if (updateError) throw updateError;
 
         // C. Insert new row
-        const { data: newGuardrail, error: insertError } = await pricingEngineDb
+        const { data: newGuardrail, error: insertError } = await db
             .from('pricing_guardrails')
             .insert({
                 city_id,
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
         }
 
         // D. Audit Log
-        await pricingEngineDb.from('pricing_audit_log').insert({
+        await db.from('pricing_audit_log').insert({
             event_type: 'GUARDRAIL_REVISION_CREATED',
             city_id,
             actor_id: user.id,

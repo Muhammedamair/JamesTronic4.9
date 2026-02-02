@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
+    "prepush:gates": "bash scripts/prepush_gates.sh",
     "danger": "danger ci"
   },
   "dependencies": {
