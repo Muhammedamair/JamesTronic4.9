@@ -93,6 +93,7 @@ type CreateTicketInput = {
   created_by?: string | null;
   assigned_technician_id?: string | null;
   assigned_transporter_id?: string | null;
+  branch_id?: string | null;
 };
 
 // Ticket service that accepts an authenticated client
