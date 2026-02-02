@@ -10,8 +10,13 @@ concurrency:
 
 jobs:
   preview-deploy:
+    if: github.repository == 'Muhammedamair/JamesTronic4.9' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: preview
+    # Skip if secrets are missing
+    timeout-minutes: 15
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     
     steps:
       - name: Checkout code
@@ -40,20 +45,27 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: Pull Vercel environment information
+        if: env.VERCEL_TOKEN != ''
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Build project artifact
+        if: env.VERCEL_TOKEN != ''
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --preview
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
         id: deploy
+        if: env.VERCEL_TOKEN != ''
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --preview)
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
