@@ -38,7 +38,9 @@ jobs:
         run: npm ci
 
       - name: Lint check
-        run: npm run lint
+        run: |
+          echo "Running ESLint (v9 flat config)..."
+          npm run lint
 
       - name: TypeScript check
         run: npx tsc --noEmit
