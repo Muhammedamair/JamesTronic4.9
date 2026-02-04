@@ -1,7 +1,52 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcrypt';
-import { headers } from 'next/headers';
+
+// ============================================================================
+// DEV TEST MODE CONFIGURATION
+// ============================================================================
+// These test phone numbers are ONLY allowed in development mode on localhost.
+// In production/staging, they behave like normal numbers (random OTP, rate limited).
+// ============================================================================
+const DEV_TEST_PHONES_DEFAULT = [
+  '+919999999990', // ADMIN
+  '+919999999991', // MANAGER
+  '+919999999992', // TECHNICIAN
+  '+919999999993', // TRANSPORTER
+  '+919999999994', // DEALER
+];
+
+/**
+ * P0 SECURITY: Check if dev test mode is allowed for this phone/request.
+ * 
+ * Test mode (fixed OTP 123456, Interakt bypass) is ONLY allowed when ALL conditions are met:
+ * 1. NODE_ENV === "development"
+ * 2. Request is from localhost (127.0.0.1 or localhost)
+ * 3. Phone is in DEV_TEST_PHONES env var (or default list)
+ * 
+ * In production/staging: test numbers behave like normal numbers.
+ */
+function isDevTestModeAllowed(phone: string, req: NextRequest): boolean {
+  // Gate 1: Must be development environment
+  if (process.env.NODE_ENV !== 'development') {
+    return false;
+  }
+
+  // Gate 2: Must be localhost
+  const host = req.headers.get('host') || '';
+  const isLocal = host.includes('localhost') || host.startsWith('127.0.0.1');
+  if (!isLocal) {
+    return false;
+  }
+
+  // Gate 3: Phone must be in allowlist
+  const envPhones = process.env.DEV_TEST_PHONES;
+  const allowedPhones = envPhones
+    ? envPhones.split(',').map(s => s.trim()).filter(Boolean)
+    : DEV_TEST_PHONES_DEFAULT;
+
+  return allowedPhones.includes(phone);
+}
 
 // Environment variables for Interakt API
 const INTERAKT_API_BASE_URL = process.env.INTERAKT_API_BASE_URL;
@@ -30,14 +75,11 @@ function normalizePhone(phone: string): string {
   }
 }
 
-// Rate limiting check function (placeholder - implement with Redis or similar in production)
+// Rate limiting check function
 async function checkRateLimit(phone_e164: string, ip: string): Promise<boolean> {
-  // TODO: Implement proper rate limiting using Redis or similar
-  // For now, just checking basic limits in the database
   // Max 5 OTPs per 15 minutes per phone
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
-  // Initialize Supabase client with service role for backend operations (only when needed)
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -88,7 +130,7 @@ async function sendOtpViaInterakt(phone_e164: string, otp: string, channel: 'wha
 
     const payload = {
       channel: 'whatsapp',
-      sender: INTERAKT_WHATSAPP_SENDER_PHONE, // Should be in format like '9190522222901'
+      sender: INTERAKT_WHATSAPP_SENDER_PHONE,
       route: 'template',
       message: {
         template_name: INTERAKT_WHATSAPP_OTP_TEMPLATE_NAME,
@@ -123,7 +165,6 @@ async function sendOtpViaInterakt(phone_e164: string, otp: string, channel: 'wha
     const result = await response.json();
     return result;
   } else {
-    // For SMS implementation (future)
     throw new Error('SMS channel not yet implemented');
   }
 }
@@ -160,20 +201,28 @@ export async function POST(req: NextRequest) {
 
     // Validate channel
     if (channel !== 'whatsapp' && channel !== 'sms') {
-      channel = 'whatsapp'; // Default to whatsapp
+      channel = 'whatsapp';
     }
 
-    // Check rate limits
-    const isRateLimited = await checkRateLimit(phone_e164, clientIP as string);
-    if (!isRateLimited) {
+    // P0 SECURITY: Check if dev test mode is allowed
+    const isDevTestMode = isDevTestModeAllowed(phone_e164, req);
+
+    // ALWAYS check rate limits - no bypass even for dev test mode
+    // (Dev mode gets higher threshold but still rate limited)
+    const isRateLimitPassed = await checkRateLimit(phone_e164, clientIP as string);
+    if (!isRateLimitPassed) {
       return new Response(
         JSON.stringify({ error: 'Too many OTP requests. Please try again later.' }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate OTP
+    // Dev test mode: fixed OTP for easier testing
+    // Production: random 6-digit OTP
+    const otp = isDevTestMode
+      ? '123456'
+      : Math.floor(100000 + Math.random() * 900000).toString();
 
     // Hash the OTP for secure storage
     const otp_hash = await bcrypt.hash(otp, 10);
@@ -199,6 +248,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Invalidate any existing unconsumed OTPs
+    await supabase
+      .from('login_otp_requests')
+      .update({ consumed_at: new Date().toISOString(), meta: { reason: 'invalidated_by_new_request' } })
+      .eq('phone_e164', phone_e164)
+      .is('consumed_at', null);
+
     // Insert OTP record into database
     const { error: insertError } = await supabase
       .from('login_otp_requests')
@@ -207,9 +263,13 @@ export async function POST(req: NextRequest) {
           phone_e164,
           otp_hash,
           channel,
+          created_at: new Date().toISOString(),
           expires_at,
           ip_address: clientIP as string,
           user_agent: userAgent,
+          attempt_count: 0,
+          max_attempts: 5,
+          meta: { isDevTestMode },
         }
       ]);
 
@@ -221,9 +281,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Send OTP
     try {
-      // Send OTP via Interakt
-      await sendOtpViaInterakt(phone_e164, otp, channel);
+      if (isDevTestMode) {
+        // Dev test mode: skip Interakt, log to console only
+        console.log(`[DEV TEST MODE] OTP for ${phone_e164} is ${otp} (Interakt bypassed, localhost only)`);
+      } else {
+        // Production: send via Interakt
+        await sendOtpViaInterakt(phone_e164, otp, channel);
+      }
     } catch (interaktError) {
       console.error('Error sending OTP via Interakt:', interaktError);
 
@@ -233,7 +299,7 @@ export async function POST(req: NextRequest) {
         .delete()
         .eq('phone_e164', phone_e164)
         .eq('otp_hash', otp_hash)
-        .eq('consumed_at', null); // Only delete unconsumed ones
+        .is('consumed_at', null);
 
       return new Response(
         JSON.stringify({ error: 'Failed to send OTP. Please try again.' }),
@@ -241,7 +307,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Return success response without exposing the OTP
+    // Return success response (NEVER expose OTP in response)
     return new Response(
       JSON.stringify({ success: true }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

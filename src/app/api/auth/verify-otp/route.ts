@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcrypt';
 import { headers } from 'next/headers';
 import { ensureUserForPhone, verifyOTP } from '@/lib/auth-system/userLinking';
+import { SessionManager } from '@/lib/auth-system/sessionManager';
 
 // Environment variables
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -297,22 +298,25 @@ async function markOTPConsumed(otpId: string, device_fingerprint?: string | null
 }
 
 // Function to create a session and set cookies
-async function createSessionAndSetCookies(userId: string, role: string, request: NextRequest) {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('Missing Supabase environment variables');
+async function createSessionAndSetCookies(userId: string, role: string, request: NextRequest, deviceFingerprint: string) {
+  try {
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    // Create session using the session manager (sets cookies via next/headers)
+    const result = await SessionManager.createSession(
+      userId,
+      role,
+      deviceFingerprint || 'unknown-device',
+      clientIP as string,
+      userAgent
+    );
+
+    return result;
+  } catch (error) {
+    console.error('Error in createSessionAndSetCookies:', error);
+    return { success: false, sessionId: '', refreshToken: '', error: 'Session creation failed' };
   }
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-
-  // Note: For actual session creation, this would require a more complex approach
-  // since we can't directly set Supabase auth cookies from a server action
-  // This is typically handled on the client side after successful verification
-  return { success: true, user_id: userId, role: role };
 }
 
 export async function POST(req: NextRequest) {
@@ -452,8 +456,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create session and set cookies (implementation needed)
-    const sessionResult = await createSessionAndSetCookies(userId, role, req);
+    // Create session and set cookies
+    const sessionResult = await createSessionAndSetCookies(userId, role, req, device_fingerprint);
     if (!sessionResult.success) {
       return new Response(
         JSON.stringify({ success: false, code: 'SESSION_CREATION_ERROR' }),
@@ -475,7 +479,7 @@ export async function POST(req: NextRequest) {
 
     // Log internal error but don't expose details to client
     return new Response(
-      JSON.stringify({ success: false, code: 'INTERNAL_ERROR' }),
+      JSON.stringify({ success: false, code: 'INTERNAL_ERROR', details: String(error) }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

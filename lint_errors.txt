@@ -1,0 +1,300 @@
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiEventsTable.tsx
+  49:9  error  Error: Cannot access variable before it is declared
+
+`fetchEvents` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiEventsTable.tsx:49:9
+  47 |
+  48 |     useEffect(() => {
+> 49 |         fetchEvents();
+     |         ^^^^^^^^^^^ `fetchEvents` accessed before it is declared
+  50 |     }, [refreshTrigger, filterEntityType, searchId]); // Re-fetch when trigger changes
+  51 |
+  52 |     useEffect(() => {
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiEventsTable.tsx:71:5
+   69 |     }, []);
+   70 |
+>  71 |     async function fetchEvents() {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  72 |         setLoading(true);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+>  73 |         const supabase = createClient();
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+>  97 |         setLoading(false);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+>  98 |     }
+      | ^^^^^^ `fetchEvents` is declared here
+   99 |
+  100 |     async function handleProcessEvents() {
+  101 |         setIsProcessing(true);  react-hooks/immutability
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx
+  40:9  error  Error: Cannot access variable before it is declared
+
+`fetchScores` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx:40:9
+  38 |
+  39 |     useEffect(() => {
+> 40 |         fetchScores();
+     |         ^^^^^^^^^^^ `fetchScores` accessed before it is declared
+  41 |
+  42 |         const supabase = createClient();
+  43 |         const channel = supabase
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx:59:5
+   57 |     }, [searchTerm, refreshTrigger]);
+   58 |
+>  59 |     async function fetchScores() {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  60 |         setLoading(true);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+>  61 |         const supabase = createClient();
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 109 |         setLoading(false);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 110 |     }
+      | ^^^^^^ `fetchScores` is declared here
+  111 |
+  112 |     // Helper: Supabase might return numeric as string, parse safely
+  113 |     const toNum = (v: number | string | null | undefined): number | null => {  react-hooks/immutability
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/mfa-challenge/page.tsx
+  18:51  error  React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function  react-hooks/rules-of-hooks
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/book/PublicBookingPageContent.tsx
+  59:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/book/PublicBookingPageContent.tsx:59:7
+  57 |   useEffect(() => {
+  58 |     if (draft) {
+> 59 |       setFormData(prev => ({
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  60 |         ...prev,
+  61 |         deviceCategory: draft.category || category,
+  62 |         brand: draft.serviceId || '',  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/login/page-wrapper.tsx
+  80:54  error  React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function  react-hooks/rules-of-hooks
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/tickets/page.tsx
+  22:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/tickets/page.tsx:22:5
+  20 |   useEffect(() => {
+  21 |     // Component is mounted, so we can safely render client-side components
+> 22 |     setIsMounted(true);
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |   }, []);
+  24 |
+  25 |   const handleTicketSelect = (ticket: Ticket) => {  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/staff/page.tsx
+  15:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/staff/page.tsx:15:5
+  13 |   useEffect(() => {
+  14 |     // Mark as client-side after hydration
+> 15 |     setIsClient(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |   }, []);
+  17 |
+  18 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/zones/ZoneDrawer.tsx
+  55:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/zones/ZoneDrawer.tsx:55:7
+  53 |       setValue('name', zone.name);
+  54 |       setValue('description', zone.description || '');
+> 55 |       setPincodes(zone.pincodes || []);
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  56 |     } else {
+  57 |       reset({
+  58 |         name: '',  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-dashboard.tsx
+  30:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-dashboard.tsx:30:5
+  28 |
+  29 |     // Initial check
+> 30 |     setNetworkStatus(navigator.onLine ? 'online' : 'offline');
+     |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  31 |
+  32 |     if (!navigator.onLine) {
+  33 |       toast.warning('You are currently offline. Some features may be limited.');  react-hooks/set-state-in-effect
+  48:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-dashboard.tsx:48:7
+  46 |         new Date(prev.created_at) > new Date(current.created_at) ? prev : current
+  47 |       );
+> 48 |       setSelectedTicket(mostRecent);
+     |       ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |     }
+  50 |   }, [customerTickets, selectedTicket]);
+  51 |                  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/SettingsPanel.tsx
+  9:11  error  An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/feedback-module.tsx
+  180:8  error  Error: Cannot access variable before it is declared
+
+`hasSubmittedFeedback` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/feedback-module.tsx:180:8
+  178 |     if (
+  179 |       (ticket.status === 'Completed' || ticket.status === 'Closed' || ticket.status === 'Delivered') &&
+> 180 |       !hasSubmittedFeedback(ticket.id) // This would need a proper implementation to check if feedback exists
+      |        ^^^^^^^^^^^^^^^^^^^^ `hasSubmittedFeedback` accessed before it is declared
+  181 |     ) {
+  182 |       // In a real implementation, you'd check if feedback exists for this ticket
+  183 |       // For now, we'll just show after a small delay
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/feedback-module.tsx:193:3
+  191 |
+  192 |   // Mock function to check if feedback exists for a ticket
+> 193 |   const hasSubmittedFeedback = (ticketId: string): boolean => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 194 |     // In a real implementation, this would check the feedback table
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |     // For now, just return false to always show the prompt
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 196 |     return false;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |   };
+      | ^^^^^ `hasSubmittedFeedback` is declared here
+  198 |
+  199 |   return (
+  200 |     <FeedbackModule   react-hooks/immutability
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/persistent-trust-strip.tsx
+  33:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/persistent-trust-strip.tsx:33:7
+  31 |       ) || customerTickets[0]; // fallback to first ticket if none are active
+  32 |
+> 33 |       setActiveTicket(activeTicket);
+     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |       setHasActiveTicket(true);
+  35 |
+  36 |       // Use trust orchestration to determine status  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-memory.tsx
+  15:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-memory.tsx:15:9
+  13 |     if (storedTrustMemory) {
+  14 |       try {
+> 15 |         setTrustMemory(JSON.parse(storedTrustMemory));
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |       } catch (e) {
+  17 |         console.error('Error parsing trust memory:', e);
+  18 |         setTrustMemory({});  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-risk-injector.tsx
+  57:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-risk-injector.tsx:57:7
+  55 |       }
+  56 |
+> 57 |       setRiskMessage({
+     |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  58 |         type: messageType,
+  59 |         message: orchestrationResult.trustMessage,
+  60 |         icon: messageIcon  react-hooks/set-state-in-effect
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/dropdown-menu.tsx
+  49:42  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/dropdown-menu.tsx:49:42
+  47 |         // This is fragile but works for simple cases like <Button>
+  48 |         const child: any = React.Children.only(children);
+> 49 |         return React.cloneElement(child, {
+     |                                          ^
+> 50 |             onClick: handleClick,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 51 |             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |             ref: ref as any,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |             ...props
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         });
+     | ^^^^^^^^^^ Passing a ref to a function may read its value during render
+  55 |     }
+  56 |
+  57 |     return (  react-hooks/refs
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/input.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+✖ 18 problems (18 errors, 0 warnings)
+

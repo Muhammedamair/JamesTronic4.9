@@ -1,0 +1,44 @@
+# CODEOWNERS for JamesTronic
+# =============================================================================
+# This file defines code ownership for critical paths.
+# Changes to these paths require approval from designated owners.
+# =============================================================================
+
+# =============================================================================
+# SECURITY-CRITICAL: Authentication & Session Management
+# =============================================================================
+# Any changes to auth routes require security review
+/src/app/api/auth/**                        @founder @security-lead
+/src/lib/auth-system/**                     @founder @security-lead
+
+# =============================================================================
+# ADMIN SHELL: Core Admin Infrastructure
+# =============================================================================
+# Changes to admin layout, sidebar, or registry require governance review
+/src/components/admin/layout/**             @founder @engineering-lead
+/src/components/admin/AdminRootLayout.tsx   @founder @engineering-lead
+/src/app/(admin)/layout.tsx                 @founder @engineering-lead
+/src/app/(admin)/AdminRootLayout.tsx        @founder @engineering-lead
+
+# =============================================================================
+# MIDDLEWARE: Request/Response Interception
+# =============================================================================
+# Middleware affects all routes - requires careful review
+/middleware.ts                              @founder @engineering-lead
+/src/middleware/**                          @founder @engineering-lead
+
+# =============================================================================
+# CI/CD & BUILD CONFIGURATION
+# =============================================================================
+# Build and deployment config changes require ops review
+/scripts/ci/**                              @founder @ops-lead
+/.github/**                                 @founder @ops-lead
+/next.config.ts                             @founder @engineering-lead
+/package.json                               @founder @engineering-lead
+
+# =============================================================================
+# DATABASE MIGRATIONS
+# =============================================================================
+# Schema changes require database owner review
+/supabase/migrations/**                     @founder @database-lead
+/supabase/sql/**                            @founder @database-lead

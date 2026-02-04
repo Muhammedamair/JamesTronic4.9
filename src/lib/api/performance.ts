@@ -1,20 +1,32 @@
 import { z } from 'zod';
+import { PerformanceTrendSchema } from '@/lib/types/performance';
 
 // Zod schemas for validation
 export const performanceRecordSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().uuid(),
   technician_id: z.string().uuid(),
   full_name: z.string().optional(),
   email: z.string().optional(),
   role: z.string().optional(),
   total_jobs: z.number().int().min(0).optional(),
-  jobs_completed: z.number().int().min(0).optional(),
+  jobs_completed: z.number().int().min(0).optional().default(0),
   avg_completion_time_minutes: z.number().int().min(0).optional(),
   sla_met: z.number().int().min(0).optional(),
   sla_breached: z.number().int().min(0).optional(),
   rating_avg: z.number().min(0).max(5).optional(),
   score: z.number().min(0).max(100).optional(),
   updated_at: z.string().optional(),
+  created_at: z.string().optional().default(() => new Date().toISOString()),
+  // Extended fields for dashboard
+  overall_score: z.number().optional().default(0),
+  repair_quality_score: z.number().optional().default(0),
+  sla_compliance_score: z.number().optional().default(0),
+  part_usage_honesty_score: z.number().optional().default(0),
+  customer_satisfaction_score: z.number().optional().default(0),
+  learning_application_score: z.number().optional().default(0),
+  score_date: z.string().optional().default(new Date().toISOString()),
+  period_type: z.string().optional().default('daily'),
+  trend: PerformanceTrendSchema.optional().default('stable'),
 });
 
 export const slaRecordSchema = z.object({
@@ -35,6 +47,10 @@ export type SLARecord = z.infer<typeof slaRecordSchema>;
 
 // API wrapper functions
 export const performanceAPI = {
+  // Get all technician scores
+  async getAllTechnicianScores(): Promise<PerformanceRecord[]> {
+    return this.getPerformances('score', 'desc', 100);
+  },
   // Get all technician performances
   async getPerformances(
     sortBy: string = 'score',
@@ -87,6 +103,16 @@ export const performanceAPI = {
             rating_avg: 0,
             score: 0,
             updated_at: undefined,
+            overall_score: 0,
+            repair_quality_score: 0,
+            sla_compliance_score: 0,
+            part_usage_honesty_score: 0,
+            customer_satisfaction_score: 0,
+            learning_application_score: 0,
+            score_date: new Date().toISOString(),
+            period_type: 'daily',
+            trend: 'stable',
+            created_at: new Date().toISOString(),
           };
         }
         throw new Error(`Failed to fetch technician performance: ${response.statusText}`);

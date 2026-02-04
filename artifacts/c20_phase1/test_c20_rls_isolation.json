@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-01-26T21:54:37.664Z",
+  "mode": "ci",
+  "summary": {
+    "passed": 18,
+    "total": 18,
+    "skipped": 0,
+    "percentage": 100
+  },
+  "results": [
+    {
+      "test": "cities: service_role can read all cities",
+      "passed": true
+    },
+    {
+      "test": "geo_pincodes: service_role can read all cities",
+      "passed": true
+    },
+    {
+      "test": "competitor_locations: service_role can read all cities",
+      "passed": true
+    },
+    {
+      "test": "expansion_candidate_locations: service_role can read all cities",
+      "passed": true
+    },
+    {
+      "test": "PostGIS extension enabled (via _c20_postgis_enabled())",
+      "passed": true,
+      "details": "Result: true"
+    },
+    {
+      "test": "_c20_app_role() callable",
+      "passed": true,
+      "details": "Result: service_role"
+    },
+    {
+      "test": "_c20_is_city_accessible() callable",
+      "passed": true
+    },
+    {
+      "test": "Pincode unique(city_id, code) constraint enforced",
+      "passed": true
+    },
+    {
+      "test": "cities: Manager A cannot see City B rows",
+      "passed": true,
+      "details": "Saw 0 City B rows (expected 0)"
+    },
+    {
+      "test": "cities: Manager B cannot see City A rows",
+      "passed": true,
+      "details": "Saw 0 City A rows (expected 0)"
+    },
+    {
+      "test": "geo_pincodes: Manager A cannot see City B rows",
+      "passed": true,
+      "details": "Saw 0 City B rows (expected 0)"
+    },
+    {
+      "test": "geo_pincodes: Manager B cannot see City A rows",
+      "passed": true,
+      "details": "Saw 0 City A rows (expected 0)"
+    },
+    {
+      "test": "competitor_locations: Manager A cannot see City B rows",
+      "passed": true,
+      "details": "Saw 0 City B rows (expected 0)"
+    },
+    {
+      "test": "competitor_locations: Manager B cannot see City A rows",
+      "passed": true,
+      "details": "Saw 0 City A rows (expected 0)"
+    },
+    {
+      "test": "expansion_candidate_locations: Manager A cannot see City B rows",
+      "passed": true,
+      "details": "Saw 0 City B rows (expected 0)"
+    },
+    {
+      "test": "expansion_candidate_locations: Manager B cannot see City A rows",
+      "passed": true,
+      "details": "Saw 0 City A rows (expected 0)"
+    },
+    {
+      "test": "Manager A can INSERT in own city (City A)",
+      "passed": true
+    },
+    {
+      "test": "Manager A cannot INSERT in other city (City B)",
+      "passed": true
+    }
+  ]
+}

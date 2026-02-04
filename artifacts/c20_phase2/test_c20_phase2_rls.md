@@ -1,0 +1,23 @@
+# C20 Phase 2: RLS Isolation & Derived Layer Tests
+**Result:** 21/21 passed (100%)
+- ✅ cities: Manager A cannot see City B 
+- ✅ cities: Manager B cannot see City A 
+- ✅ geo_pincodes: Manager A cannot see City B 
+- ✅ geo_pincodes: Manager B cannot see City A 
+- ✅ competitor_locations: Manager A cannot see City B 
+- ✅ competitor_locations: Manager B cannot see City A 
+- ✅ expansion_candidate_locations: Manager A cannot see City B 
+- ✅ expansion_candidate_locations: Manager B cannot see City A 
+- ✅ demand_points_daily: Manager A cannot see City B 
+- ✅ demand_points_daily: Manager B cannot see City A 
+- ✅ travel_time_matrix_cache: Manager A cannot see City B 
+- ✅ travel_time_matrix_cache: Manager B cannot see City A 
+- ✅ expansion_scenarios: Manager A cannot see City B 
+- ✅ expansion_scenarios: Manager B cannot see City A 
+- ✅ expansion_scenario_runs: Manager A cannot see City B 
+- ✅ expansion_scenario_runs: Manager B cannot see City A 
+- ✅ expansion_location_scores: Manager A sees only own run 
+- ✅ Manager cannot write demand_points_daily 
+- ✅ Audit Log: Manager A cannot see City B logs 
+- ✅ Audit Log: Manager B cannot see City A logs 
+- ✅ Audit Log: Technician cannot see any logs 

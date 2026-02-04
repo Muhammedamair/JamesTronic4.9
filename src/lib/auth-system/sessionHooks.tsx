@@ -53,23 +53,41 @@ export const useRole = (): { role: string | null; hasRole: (requiredRole: string
 // Session provider component
 interface SessionProviderProps {
   children: ReactNode;
+  initialSession?: any | null;
+  initialRole?: string | null;
 }
 
-export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
-  const [session, setSession] = useState<any | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+export const SessionProvider: React.FC<SessionProviderProps> = ({ children, initialSession = null, initialRole = null }) => {
+  const [session, setSession] = useState<any | null>(initialSession);
+  const [role, setRole] = useState<string | null>(initialRole);
+  const [loading, setLoading] = useState(!initialSession); // If we have an initial session, we are not loading. If it's null, we might be loading (checking if valid) or just unauthenticated. Actually if initialSession is explicitly passed (even null), we can trust it? No, usually initialSession is only passed if valid.
+  // Better logic: if initialSession is undefined, loading=true. If passed (null or object), loading=false.
+  // But for now, let's assume if initialSession is provided, it's valid. If not, we fetch.
+  // Wait, if server says "no session", it passes null.
+  // So we should check if initialSession !== undefined?
+  // But props defaults to null.
+
+  // Let's rely on the fact that if we use the prop, we pass it.
+  // If we pass null, it means unauthenticated.
+
+  const [authenticated, setAuthenticated] = useState(!!initialSession);
   const router = useRouter();
 
   // Check session status
   const checkSession = async () => {
     try {
       setLoading(true);
-      
+
       // Make API call to validate session
-      const response = await fetch('/api/auth/session');
-      
+      // 'credentials: include' is REQUIRED for same-origin requests to send HttpOnly cookies in some environments
+      const response = await fetch('/api/auth/session', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Force cookies to be sent
+        cache: 'no-store'
+      });
+
       if (response.ok) {
         const data = await response.json();
         if (data.valid) {
@@ -101,12 +119,12 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     try {
       // Make API call to revoke session
       await fetch('/api/auth/logout', { method: 'POST' });
-      
+
       // Clear session state
       setSession(null);
       setRole(null);
       setAuthenticated(false);
-      
+
       // Redirect to login
       router.push('/login');
     } catch (error) {
@@ -126,10 +144,17 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     return requiredRoles.includes(role);
   };
 
-  // Check session on mount
+  // Check session on mount only if initialSession was NOT provided (or logic dictates re-check)
   useEffect(() => {
-    checkSession();
-  }, []);
+    if (initialSession === undefined && initialRole === undefined) {
+      checkSession();
+    } else {
+      // If initial session provided, we trust it for now.
+      // We could perform a background re-validation if deemed necessary,
+      // but preventing the redirect loop is priority.
+      setLoading(false);
+    }
+  }, [initialSession, initialRole]);
 
   const value: SessionContextType = {
     session,

@@ -19,6 +19,7 @@ export default function TicketsPage() {
 
   useEffect(() => {
     // Component is mounted, so we can safely render client-side components
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 

@@ -1,0 +1,978 @@
+
+> james-tronic@0.1.0 lint
+> eslint src
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/AdminRootLayout.tsx
+  17:11  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiAuditTable.tsx
+   39:36  warning  'fieldId' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  107:8   warning  React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  149:8   warning  React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiEventsTable.tsx
+   78:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiEventsTable.tsx:78:9
+  76 |
+  77 |     useEffect(() => {
+> 78 |         fetchEvents();
+     |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  79 |     }, [refreshTrigger, filterEntityType, searchId]); // Re-fetch when trigger changes
+  80 |
+  81 |     useEffect(() => {  react-hooks/set-state-in-effect
+   79:8   warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+   98:8   warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+  141:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiRecommendationsTable.tsx
+   58:6   warning  React Hook useEffect has a missing dependency: 'fetchRecommendations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  141:14  warning  'error' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx
+   80:21  error    Error: Cannot access variable before it is declared
+
+`toNum` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx:80:21
+  78 |                 entity_id: row.ai_events?.entity_id || 'Unknown',
+  79 |                 // Map scores
+> 80 |                 ov: toNum(row.ov),
+     |                     ^^^^^ `toNum` accessed before it is declared
+  81 |                 tv: toNum(row.tv),
+  82 |                 bv: toNum(row.bv),
+  83 |                 lgv: toNum(row.lgv),
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/ai-brain/components/AiValueScoresTable.tsx:115:5
+  113 |
+  114 |     // Helper: Supabase might return numeric as string, parse safely
+> 115 |     const toNum = (v: number | string | null | undefined): number | null => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 116 |         if (v === null || v === undefined) return null;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 117 |         const n = Number(v);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 118 |         return Number.isFinite(n) ? n : null;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 119 |     };
+      | ^^^^^^^ `toNum` is declared here
+  120 |
+  121 |     function getScoreColor(score: number | null): string {
+  122 |         const val = score ?? 0;  react-hooks/immutability
+  110:8   warning  React Hook useEffect has a missing dependency: 'fetchScores'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/assistant/page.tsx
+   6:10  warning  'Card' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  10:18  warning  'AvatarFallback' is defined but never used                                                                @typescript-eslint/no-unused-vars
+  10:34  warning  'AvatarImage' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+  39:8   warning  React Hook useEffect has a missing dependency: 'toast'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  74:18  warning  'err' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/call-center/page.tsx
+   5:19  warning  'VoiceInteraction' is defined but never used  @typescript-eslint/no-unused-vars
+  17:29  warning  'MoreHorizontal' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/compliance/page.tsx
+  18:5   warning  'Gavel' is defined but never used             @typescript-eslint/no-unused-vars
+  31:5   warning  'PolarRadiusAxis' is defined but never used   @typescript-eslint/no-unused-vars
+  34:5   warning  'LineChart' is defined but never used         @typescript-eslint/no-unused-vars
+  35:5   warning  'Line' is defined but never used              @typescript-eslint/no-unused-vars
+  36:5   warning  'XAxis' is defined but never used             @typescript-eslint/no-unused-vars
+  37:5   warning  'YAxis' is defined but never used             @typescript-eslint/no-unused-vars
+  38:5   warning  'CartesianGrid' is defined but never used     @typescript-eslint/no-unused-vars
+  39:5   warning  'Tooltip' is defined but never used           @typescript-eslint/no-unused-vars
+  49:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  81:18  warning  'e' is defined but never used                 @typescript-eslint/no-unused-vars
+  91:18  warning  'e' is defined but never used                 @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/dark-stores/page.tsx
+  11:44  warning  'ArrowRight' is defined but never used        @typescript-eslint/no-unused-vars
+  23:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  72:18  warning  'err' is defined but never used               @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/dealers/[id]/analytics/page.tsx
+  11:16  warning  'TabsContent' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  13:5   warning  'Table' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  14:5   warning  'TableHeader' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  15:5   warning  'TableRow' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  16:5   warning  'TableHead' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  17:5   warning  'TableBody' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  18:5   warning  'TableCell' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  80:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/dealers/[id]/page.tsx
+  12:5   warning  'Building2' is defined but never used    @typescript-eslint/no-unused-vars
+  12:37  warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+  12:50  warning  'Clock' is defined but never used        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/dealers/analytics/page.tsx
+  22:5   warning  'AlertTriangle' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  36:11  warning  'router' is assigned a value but never used                                                                        @typescript-eslint/no-unused-vars
+  57:8   warning  React Hook useEffect has a missing dependency: 'fetchAnalytics'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/dealers/page.tsx
+  17:21  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/expansion/page.tsx
+  11:10  warning  'Map' is defined but never used               @typescript-eslint/no-unused-vars
+  11:50  warning  'Smartphone' is defined but never used        @typescript-eslint/no-unused-vars
+  16:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/finance/page.tsx
+  11:5   warning  'TrendingUp' is defined but never used        @typescript-eslint/no-unused-vars
+  16:5   warning  'ArrowDownRight' is defined but never used    @typescript-eslint/no-unused-vars
+  29:5   warning  'BarChart' is defined but never used          @typescript-eslint/no-unused-vars
+  30:5   warning  'Bar' is defined but never used               @typescript-eslint/no-unused-vars
+  31:5   warning  'Legend' is defined but never used            @typescript-eslint/no-unused-vars
+  39:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/inventory/locations/[id]/page.tsx
+   5:52  warning  'CardDescription' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  21:5   warning  'Search' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+  27:10  warning  'formatDistanceToNow' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  39:12  warning  'resolving' is assigned a value but never used                                                                        @typescript-eslint/no-unused-vars
+  96:8   warning  React Hook useEffect has a missing dependency: 'fetchLocationData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/inventory/parts/[id]/page.tsx
+  19:5  warning  'BarChart3' is defined but never used  @typescript-eslint/no-unused-vars
+  22:5  warning  'History' is defined but never used    @typescript-eslint/no-unused-vars
+  24:5  warning  'RefreshCw' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/inventory/reorders/page.tsx
+  14:52  warning  'CardDescription' is defined but never used      @typescript-eslint/no-unused-vars
+  35:5   warning  'AlertTriangle' is defined but never used        @typescript-eslint/no-unused-vars
+  36:5   warning  'Package' is defined but never used              @typescript-eslint/no-unused-vars
+  42:10  warning  'formatDistanceToNow' is defined but never used  @typescript-eslint/no-unused-vars
+  56:11  warning  'supabase' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/login/page.tsx
+  18:22  warning  'setCategories' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/logistics/page.tsx
+  18:10  warning  'format' is defined but never used            @typescript-eslint/no-unused-vars
+  25:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/mfa-setup/page.tsx
+  29:6  warning  React Hook useEffect has a missing dependency: 'fetchMfaStatus'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/notifications/page.tsx
+  17:51  warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+  17:66  warning  'Users' is defined but never used          @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/performance/page.tsx
+   8:10  warning  'Badge' is defined but never used           @typescript-eslint/no-unused-vars
+  18:10  warning  'format' is defined but never used          @typescript-eslint/no-unused-vars
+  22:13  warning  'toast' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/predictions/page.tsx
+  17:62  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/pricing/page.tsx
+  25:51  warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/repair-guides/[id]/page.tsx
+   6:23  warning  'RepairStep' is defined but never used   @typescript-eslint/no-unused-vars
+  14:57  warning  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/repair-guides/page.tsx
+  17:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/revenue/page.tsx
+   6:16  warning  'CardHeader' is defined but never used       @typescript-eslint/no-unused-vars
+   6:28  warning  'CardTitle' is defined but never used        @typescript-eslint/no-unused-vars
+   6:52  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+  10:31  warning  'Search' is defined but never used           @typescript-eslint/no-unused-vars
+  45:19  warning  'result' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  66:18  warning  'err' is defined but never used              @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/scheduling/page.tsx
+   3:20  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+   8:10  warning  'Badge' is defined but never used      @typescript-eslint/no-unused-vars
+  10:13  warning  'Calendar' is defined but never used   @typescript-eslint/no-unused-vars
+  10:23  warning  'Clock' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/security-events/page.tsx
+   7:10  warning  'Input' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  36:6   warning  React Hook useEffect has a missing dependency: 'fetchSecurityEvents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/security/alerts/page.tsx
+  23:10  warning  'Input' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  56:6   warning  React Hook useEffect has a missing dependency: 'fetchAlerts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/security/events/page.tsx
+  74:6  warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/security/forensics/page.tsx
+  69:10  warning  'selectedLog' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+  74:6   warning  React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/skills/page.tsx
+   6:69  warning  'CardFooter' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+  11:13  warning  'Star' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+  11:24  warning  'Activity' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  11:41  warning  'Shield' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+  41:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/supply-chain/page.tsx
+  73:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/admin/uptime/page.tsx
+   6:52  warning  'CardDescription' is defined but never used          @typescript-eslint/no-unused-vars
+  10:15  warning  'Server' is defined but never used                   @typescript-eslint/no-unused-vars
+  10:23  warning  'Database' is defined but never used                 @typescript-eslint/no-unused-vars
+  10:33  warning  'Cloud' is defined but never used                    @typescript-eslint/no-unused-vars
+  10:40  warning  'Shield' is defined but never used                   @typescript-eslint/no-unused-vars
+  18:12  warning  'loading' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  42:11  warning  'getStatusColor' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  69:18  warning  'err' is defined but never used                      @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/tech/jobs/[id]/page.tsx
+  161:32  warning  'status' is defined but never used                       @typescript-eslint/no-unused-vars
+  261:9   warning  'currentStatusLabel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/tech/jobs/page.tsx
+   14:3    warning  'Calendar' is defined but never used                    @typescript-eslint/no-unused-vars
+   18:3    warning  'MoreVertical' is defined but never used                @typescript-eslint/no-unused-vars
+   19:3    warning  'ChevronRight' is defined but never used                @typescript-eslint/no-unused-vars
+   23:3    warning  'PackageOpen' is defined but never used                 @typescript-eslint/no-unused-vars
+   24:3    warning  'AlertCircle' is defined but never used                 @typescript-eslint/no-unused-vars
+   31:10   warning  'createTicketService' is defined but never used         @typescript-eslint/no-unused-vars
+   55:11   warning  'TimelineStep' is defined but never used                @typescript-eslint/no-unused-vars
+   67:49   warning  'loading' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   67:113  warning  'setSelectedTicket' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  199:21   warning  'eventType' is assigned a value but never used          @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(admin)/tech/jobs/page_with_current_realtime.tsx
+  12:10  warning  'Ticket' is defined but never used    @typescript-eslint/no-unused-vars
+  72:22  warning  'ticketId' is defined but never used  @typescript-eslint/no-unused-vars
+  72:32  warning  'status' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(app)/app/warranty/page.tsx
+   7:10  warning  'Button' is defined but never used            @typescript-eslint/no-unused-vars
+  17:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(app)/my-performance/page.tsx
+  10:10  warning  'Alert' is defined but never used             @typescript-eslint/no-unused-vars
+  10:17  warning  'AlertTitle' is defined but never used        @typescript-eslint/no-unused-vars
+  10:29  warning  'AlertDescription' is defined but never used  @typescript-eslint/no-unused-vars
+  12:5   warning  'CheckCircle' is defined but never used       @typescript-eslint/no-unused-vars
+  13:5   warning  'XCircle' is defined but never used           @typescript-eslint/no-unused-vars
+  15:5   warning  'Clock' is defined but never used             @typescript-eslint/no-unused-vars
+  17:5   warning  'TrendingUp' is defined but never used        @typescript-eslint/no-unused-vars
+  18:5   warning  'TrendingDown' is defined but never used      @typescript-eslint/no-unused-vars
+  20:5   warning  'Activity' is defined but never used          @typescript-eslint/no-unused-vars
+  26:11  warning  'router' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/book/confirm/page.tsx
+  12:39  warning  'clearDraft' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/book/page.tsx
+  5:10  warning  'createTicketService' is defined but never used    @typescript-eslint/no-unused-vars
+  5:31  warning  'createCustomerService' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/login/page-wrapper.tsx
+  72:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/profile/page.tsx
+  11:5  warning  'User' is defined but never used           @typescript-eslint/no-unused-vars
+  13:5  warning  'ClipboardList' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/(public)/rejected/page.tsx
+  8:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/audit/route.ts
+  5:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/events/route.ts
+  5:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/process/route.ts
+  2:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+  3:10  warning  'ActionDispatcherService' is defined but never used  @typescript-eslint/no-unused-vars
+  5:10  warning  'timeAgo' is defined but never used                  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/recommendations/[id]/review/route.ts
+  3:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/recommendations/route.ts
+   6:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+  58:17  warning  'supabase' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/ai-brain/route.ts
+  2:10  warning  'createClientFromRequest' is defined but never used  @typescript-eslint/no-unused-vars
+  5:28  warning  'request' is defined but never used                  @typescript-eslint/no-unused-vars
+  7:27  warning  'user' is assigned a value but never used            @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/inventory/generate-forecasts/route.ts
+  5:28  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/mfa/setup/start/route.ts
+  21:28  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/mfa/setup/verify/route.ts
+  8:36  warning  'secret' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/mfa/start/route.ts
+  6:28  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/mfa/status/route.ts
+  5:27  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/recent-device-conflicts/route.ts
+  9:27  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/security/alerts/list/route.ts
+  1:10  warning  'NextRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/security/alerts/resolve/route.ts
+  1:10  warning  'NextRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/security/audit/export/route.ts
+  1:10  warning  'NextRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/security/audit/integrity-check/route.ts
+  1:10  warning  'NextRequest' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/admin/security/audit/list/route.ts
+  1:10  warning  'NextRequest' is defined but never used  @typescript-eslint/no-unused-vars
+  4:10  warning  'AuditLogger' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/auth/request-email-otp/route.ts
+  17:11  warning  'clientIP' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  18:11  warning  'userAgent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/auth/request-otp/route.ts
+  79:51  warning  'ip' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/auth/session/route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/auth/verify-email-otp/route.ts
+  19:25  warning  'device_fingerprint' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/auth/verify-otp/route.ts
+    3:8   warning  'bcrypt' is defined but never used             @typescript-eslint/no-unused-vars
+    4:10  warning  'headers' is defined but never used            @typescript-eslint/no-unused-vars
+   34:51  warning  'ip' is defined but never used                 @typescript-eslint/no-unused-vars
+  439:17  warning  'userRole' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/feedback/route.ts
+  29:6   warning  'FeedbackInput' is defined but never used                   @typescript-eslint/no-unused-vars
+  98:44  warning  'existingFeedbackError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/notifications/route.ts
+   3:10  warning  'z' is defined but never used                      @typescript-eslint/no-unused-vars
+  22:16  warning  'getCustomerIdFromAuth' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/quotations/approve/route.ts
+  4:26  warning  'createServerSupabaseClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/quotations/reject/route.ts
+  4:26  warning  'createServerSupabaseClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/tickets/[id]/route.ts
+  106:37  warning  'slaError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/tickets/route.ts
+   3:10  warning  'z' is defined but never used                  @typescript-eslint/no-unused-vars
+  89:39  warning  'slaError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/customer/timeline/route.ts
+  3:10  warning  'getSupabaseClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/debug/whoami/route.ts
+  7:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/expansion/audit/route.ts
+  57:15  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/parts/requests/route.ts
+  37:7  warning  'updatePartRequestSchema' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/performance/route.ts
+  35:7  warning  'slaRecordSchema' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  91:9  warning  'query' is never reassigned. Use 'const' instead      prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/pricing/base-rates/revision/route.ts
+  2:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/pricing/catalog/route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/pricing/guardrails/revision/route.ts
+  73:43  warning  'fetchError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/pricing/overview/route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/pricing/rulesets/route.ts
+  1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+  5:27  warning  'request' is defined but never used        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/sla-risk-check/route.ts
+   6:10  warning  'cookies' is defined but never used             @typescript-eslint/no-unused-vars
+  11:11  warning  'TicketWithCustomer' is defined but never used  @typescript-eslint/no-unused-vars
+  19:27  warning  'request' is defined but never used             @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/tickets/assign/route.ts
+  29:6  warning  'AssignTicketInput' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/tickets/create/route.ts
+  49:9   warning  'branchId' is never reassigned. Use 'const' instead  prefer-const
+  53:48  warning  'findError' is assigned a value but never used       @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/api/zones/route.ts
+  13:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/AppShell.tsx
+  7:10  warning  'SessionProvider' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/create/page.tsx
+   5:54  warning  'TicketWithCustomer' is defined but never used       @typescript-eslint/no-unused-vars
+  48:11  warning  'customer' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/device-management/page.tsx
+  5:52  warning  'CardFooter' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/layout.tsx
+  6:10  warning  'cookies' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/logistics/page.tsx
+  11:18  warning  'Package' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  11:60  warning  'Filter' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+  53:11  warning  'session' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+  62:6   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/expansion/page.tsx
+   5:10  warning  'Badge' is defined but never used                                                                                                  @typescript-eslint/no-unused-vars
+   6:10  warning  'MapPin' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+  39:8   warning  React Hook useEffect has missing dependencies: 'getLatestRuns' and 'supabase'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/expansion/results/[runId/]/page.tsx
+   7:18  warning  'Info' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  45:8   warning  React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/expansion/scenarios/page.tsx
+  31:8  warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/pricing/base-rates/page.tsx
+    9:93  warning  'DrawerTrigger' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+   22:11  warning  'router' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+   47:8   warning  React Hook useEffect has a missing dependency: 'loadRates'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  101:27  warning  'item' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/pricing/guardrails/page.tsx
+    6:10  warning  'PricingAPI' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+   10:93  warning  'DrawerTrigger' is defined but never used                                                                    @typescript-eslint/no-unused-vars
+   15:33  warning  'ArrowRight' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+   15:45  warning  'Save' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   48:8   warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  113:27  warning  'item' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/pricing/quotes/_demo/page.tsx
+  147:27  warning  'reason' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/pricing/quotes/page.tsx
+    3:20  warning  'useMemo' is defined but never used                  @typescript-eslint/no-unused-vars
+   14:33  warning  'Loader2' is defined but never used                  @typescript-eslint/no-unused-vars
+   23:29  warning  'CardHeader' is defined but never used               @typescript-eslint/no-unused-vars
+   23:41  warning  'CardTitle' is defined but never used                @typescript-eslint/no-unused-vars
+   23:52  warning  'CardDescription' is defined but never used          @typescript-eslint/no-unused-vars
+   24:10  warning  'isPast' is defined but never used                   @typescript-eslint/no-unused-vars
+   24:18  warning  'parseISO' is defined but never used                 @typescript-eslint/no-unused-vars
+   27:10  warning  'createClient' is defined but never used             @typescript-eslint/no-unused-vars
+   43:12  warning  'loadingCatalog' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   54:9   warning  'isError' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  105:19  warning  'newQuote' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  108:18  warning  'e' is defined but never used                        @typescript-eslint/no-unused-vars
+  118:18  warning  'e' is defined but never used                        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/manager/pricing/rulesets/page.tsx
+   13:27  warning  'Shield' is defined but never used  @typescript-eslint/no-unused-vars
+  115:27  warning  'item' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/performance/page.tsx
+  11:3  warning  'Clock' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/technicians/[id]/page.tsx
+   18:71  warning  'UserCheck' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+  172:6   warning  React Hook useEffect has a missing dependency: 'refetchTickets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  201:15  warning  'data' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/technicians/page.tsx
+  221:34  warning  'roleId' is defined but never used                      @typescript-eslint/no-unused-vars
+  232:45  warning  'profileCheckError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/tickets/page.tsx
+  6:10  warning  'ticketApi' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/transporters/[id]/page.tsx
+  81:50  warning  'isLoadingTickets' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/app/transporters/page.tsx
+  193:34  warning  'roleId' is defined but never used                      @typescript-eslint/no-unused-vars
+  204:45  warning  'profileCheckError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/tech/page.tsx
+  15:3   warning  'Phone' is defined but never used                    @typescript-eslint/no-unused-vars
+  19:3   warning  'Award' is defined but never used                    @typescript-eslint/no-unused-vars
+  21:3   warning  'Target' is defined but never used                   @typescript-eslint/no-unused-vars
+  34:25  warning  'setTickets' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  45:17  warning  'fetchedTickets' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  45:74  warning  'fetchError' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/transporter/jobs/page.tsx
+  11:47  warning  'XCircle' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  53:6   warning  React Hook useEffect has a missing dependency: 'fetchJobs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/app/transporter/page.tsx
+  33:9   warning  'router' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  38:75  warning  'refetch' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/admin-technician-page.tsx
+  192:34  warning  'roleId' is defined but never used                      @typescript-eslint/no-unused-vars
+  211:45  warning  'profileCheckError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/layout/AdminHeader.tsx
+  27:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/layout/AdminSidebar.tsx
+   25:8   warning  'AdminEngine' is defined but never used         @typescript-eslint/no-unused-vars
+  147:19  warning  'GroupIcon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/performance/PerformanceSidebar.tsx
+  6:10  warning  'Badge' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/performance/PerformanceTable.tsx
+  51:6  warning  React Hook useEffect has a missing dependency: 'initialData.length'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/tickets/TechnicianRecommendationList.tsx
+  86:6  warning  React Hook useEffect has a missing dependency: 'calculateScores'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/tickets/TicketAssignmentDrawer.tsx
+  52:13  warning  'updatedTicket' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/tickets/TicketCard.tsx
+  5:32  warning  'Clock' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/tickets/TicketList.tsx
+  3:27  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/zones/ZoneCard.tsx
+  6:10  warning  'MoreVertical' is defined but never used  @typescript-eslint/no-unused-vars
+  6:32  warning  'Trash2' is defined but never used        @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/admin/zones/ZoneList.tsx
+  3:27  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/auth/AuthWall.tsx
+   5:10  warning  'Card' is defined but never used                   @typescript-eslint/no-unused-vars
+   5:16  warning  'CardContent' is defined but never used            @typescript-eslint/no-unused-vars
+   5:29  warning  'CardDescription' is defined but never used        @typescript-eslint/no-unused-vars
+   5:46  warning  'CardFooter' is defined but never used             @typescript-eslint/no-unused-vars
+   5:58  warning  'CardHeader' is defined but never used             @typescript-eslint/no-unused-vars
+   5:70  warning  'CardTitle' is defined but never used              @typescript-eslint/no-unused-vars
+  28:9   warning  'searchParams' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  29:11  warning  'clearDraft' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/booking/BookingFlowProvider.tsx
+   14:10  warning  'BookingEvent' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+   38:10  warning  'dropOffDetector' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+  156:11  warning  'handleRouteChange' is assigned a value but never used                                                            @typescript-eslint/no-unused-vars
+  177:6   warning  React Hook useEffect has a missing dependency: 'trackPageView'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/booking/BookingFlowTracker.tsx
+  37:23  warning  'setCurrentView' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/booking/CartSidebar.tsx
+  6:10  warning  'Check' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/booking/PublicBookingForm.tsx
+   9:10  warning  'Card' is defined but never used         @typescript-eslint/no-unused-vars
+   9:16  warning  'CardContent' is defined but never used  @typescript-eslint/no-unused-vars
+  11:10  warning  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+  11:36  warning  'ChevronUp' is defined but never used    @typescript-eslint/no-unused-vars
+  11:61  warning  'Wrench' is defined but never used       @typescript-eslint/no-unused-vars
+  11:69  warning  'Smartphone' is defined but never used   @typescript-eslint/no-unused-vars
+  11:81  warning  'Laptop' is defined but never used       @typescript-eslint/no-unused-vars
+  11:89  warning  'Tv' is defined but never used           @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-dashboard.tsx
+  14:32  warning  'getCachedTicketState' is defined but never used          @typescript-eslint/no-unused-vars
+  14:54  warning  'getCachedSLA' is defined but never used                  @typescript-eslint/no-unused-vars
+  14:68  warning  'getCachedEvents' is defined but never used               @typescript-eslint/no-unused-vars
+  14:85  warning  'getCachedTransporterState' is defined but never used     @typescript-eslint/no-unused-vars
+  17:53  warning  'refetchCustomerData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-notifications-view.tsx
+   21:3   warning  'Clock' is defined but never used                  @typescript-eslint/no-unused-vars
+  100:11  warning  'customerData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/customer-provider.tsx
+  98:6  warning  React Hook useEffect has a missing dependency: 'checkCustomerStatus'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/my-repairs-panel.tsx
+   7:10  warning  'Progress' is defined but never used                @typescript-eslint/no-unused-vars
+  33:38  warning  'createdAt' is defined but never used               @typescript-eslint/no-unused-vars
+  33:49  warning  'updatedAt' is defined but never used               @typescript-eslint/no-unused-vars
+  48:9   warning  'IconComponent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/notification-panel.tsx
+   4:29  warning  'CardHeader' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+   4:41  warning  'CardTitle' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+   8:35  warning  'AlertTriangle' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  19:6   warning  React Hook useEffect has a missing dependency: 'loadNotifications'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/pickup-status-card.tsx
+  5:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/quotation-card.tsx
+  18:11  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/sla-countdown.tsx
+   8:17  warning  'Timer' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  25:11  warning  'user' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+  34:6   warning  React Hook useEffect has a missing dependency: 'loadSLAData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  43:11  warning  'cachedSLA' is never reassigned. Use 'const' instead                                                            prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/customer/ticket-timeline.tsx
+   22:22  warning  'setTotalPages' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+   23:23  warning  'setTotalEvents' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+   24:23  warning  'setHasNextPage' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+   25:23  warning  'setHasPrevPage' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+   48:6   warning  React Hook useEffect has a missing dependency: 'loadTimeline'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   50:31  warning  'page' is assigned a value but never used                                                                        @typescript-eslint/no-unused-vars
+  115:29  warning  'index' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/home/CategoryCard.tsx
+  20:5  warning  'id' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/home/OurProcessSection.tsx
+  59:54  warning  'index' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/POGenerator.tsx
+  30:10  warning  'CalendarIcon' is defined but never used           @typescript-eslint/no-unused-vars
+  31:10  warning  'format' is defined but never used                 @typescript-eslint/no-unused-vars
+  61:10  warning  'partRequests' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/PartRequestList.tsx
+  36:3  warning  'onStatusChange' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  45:6  warning  React Hook useEffect has a missing dependency: 'loadPartRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/PartsArrivalDialog.tsx
+  120:9  warning  'partsCatalogApi' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/SupplierList.tsx
+  41:6  warning  React Hook useEffect has a missing dependency: 'loadSuppliers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/TechnicianPartRequestForm.tsx
+    7:50  warning  'PartRequest' is defined but never used          @typescript-eslint/no-unused-vars
+  192:13  warning  'newRequest' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/parts/TechnicianPartsStatus.tsx
+  46:6   warning  React Hook useEffect has a missing dependency: 'loadPartRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  56:11  warning  'allRequests' is never reassigned. Use 'const' instead                                                               prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/pricing/CityScopeIndicator.tsx
+  28:9  warning  'badgeVariant' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/pricing/PricingPageHeader.tsx
+  4:10  warning  'useSupabase' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/pricing/quotes/useQuotes.ts
+  93:21  warning  'data' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/HamburgerMenu.tsx
+   4:19  warning  'User' is defined but never used      @typescript-eslint/no-unused-vars
+   4:25  warning  'LogOut' is defined but never used    @typescript-eslint/no-unused-vars
+   4:43  warning  'Bell' is defined but never used      @typescript-eslint/no-unused-vars
+  13:56  warning  'onLogout' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/OneSignalInitializer.tsx
+  5:31  warning  'savePlayerIdToDatabase' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/SettingsPanel.tsx
+  9:11  error  An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/feedback-module.tsx
+  177:33  warning  'ticketId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/sla-display.tsx
+    8:10  warning  'useCustomer' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+   22:3   warning  'ticketId' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  176:6   warning  React Hook useEffect has a missing dependency: 'fetchSLA'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  255:3   warning  'promisedHours' is defined but never used                                                                    @typescript-eslint/no-unused-vars
+  256:3   warning  'elapsedHours' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/ticket-timeline-drawer.tsx
+  23:3   warning  'Calendar' is defined but never used               @typescript-eslint/no-unused-vars
+  95:11  warning  'customerData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/shared/timeline-badge-row.tsx
+  19:3  warning  'ticketId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/sla/RiskHeatmap.tsx
+  6:38  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/booking-confirmation-trust.tsx
+  17:3  warning  'estimatedCompletionHours' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/completion-trust-summary.tsx
+  40:9  warning  'orchestrationResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/confidence-banner.tsx
+   5:10  warning  'Button' is defined but never used    @typescript-eslint/no-unused-vars
+  21:3   warning  'ticketId' is defined but never used  @typescript-eslint/no-unused-vars
+  24:3   warning  'status' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/persistent-trust-strip.tsx
+  5:29  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+  5:46  warning  'CardHeader' is defined but never used       @typescript-eslint/no-unused-vars
+  5:58  warning  'CardTitle' is defined but never used        @typescript-eslint/no-unused-vars
+  7:53  warning  'User' is defined but never used             @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-hero-strip.tsx
+  3:10  warning  'Badge' is defined but never used    @typescript-eslint/no-unused-vars
+  4:49  warning  'Package' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-panel.tsx
+   9:3  warning  'Clock' is defined but never used     @typescript-eslint/no-unused-vars
+  36:3  warning  'ticketId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/trust/trust-risk-injector.tsx
+  5:10  warning  'Badge' is defined but never used         @typescript-eslint/no-unused-vars
+  6:25  warning  'Clock' is defined but never used         @typescript-eslint/no-unused-vars
+  7:10  warning  'getTrustCopy' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/device-intake-form.tsx
+  16:10  warning  'BookingFlowTracker' is defined but never used      @typescript-eslint/no-unused-vars
+  16:30  warning  'useBookingFlowTracking' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/dropdown-menu.tsx
+   51:13  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+   52:13  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/rules-of-hooks', '@typescript-eslint/no-explicit-any', or 'react/no-find-dom-node')
+   83:15  warning  'handleClickOutside' is assigned a value but never used                                                                                                           @typescript-eslint/no-unused-vars
+  103:8   warning  React Hook React.useEffect has a missing dependency: 'ctx'. Either include it or remove the dependency array                                                      react-hooks/exhaustive-deps
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/public-header.tsx
+   6:10  warning  'Button' is defined but never used           @typescript-eslint/no-unused-vars
+  18:11  warning  'user' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  19:9   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/ticket-card.tsx
+  34:3  warning  'createdAt' is defined but never used                    @typescript-eslint/no-unused-vars
+  58:9  warning  'currentStatusLabel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/tooltip.tsx
+  47:17  warning  'sideOffset' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/components/ui/use-toast.ts
+   19:7  warning  'actionTypes' is assigned a value but only used as a type  @typescript-eslint/no-unused-vars
+  141:6  warning  'Toast' is defined but never used                          @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/ai-assistant.ts
+  4:5   warning  'Conversation' is defined but never used        @typescript-eslint/no-unused-vars
+  4:19  warning  'conversationSchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/behavior.ts
+   7:5   warning  'CustomerInsight' is defined but never used  @typescript-eslint/no-unused-vars
+  20:23  warning  'result' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/dealer.ts
+    4:5   warning  'DealerZone' is defined but never used        @typescript-eslint/no-unused-vars
+   10:5   warning  'dealerZoneSchema' is defined but never used  @typescript-eslint/no-unused-vars
+  254:17  warning  'data' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  349:32  warning  'date' is defined but never used              @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/pricing.ts
+  4:5  warning  'PricingModifier' is defined but never used        @typescript-eslint/no-unused-vars
+  9:5  warning  'pricingModifierSchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/repair-guide.ts
+   2:42  warning  'RepairStep' is defined but never used              @typescript-eslint/no-unused-vars
+  13:13  warning  'rpcName' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/scheduling.ts
+  3:5   warning  'ScheduleSlot' is defined but never used        @typescript-eslint/no-unused-vars
+  3:19  warning  'scheduleSlotSchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/supply-chain.ts
+  3:5  warning  'InventoryForecast' is defined but never used  @typescript-eslint/no-unused-vars
+  8:5  warning  'forecastSchema' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/tickets.ts
+    2:29  warning  'ticketSchema' is defined but never used          @typescript-eslint/no-unused-vars
+  278:11  warning  'query' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/api/workforce.ts
+   7:5  warning  'WorkforcePerformanceDaily' is defined but never used        @typescript-eslint/no-unused-vars
+   8:5  warning  'WorkforceDailyScoreResult' is defined but never used        @typescript-eslint/no-unused-vars
+  15:5  warning  'workforcePerformanceDailySchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/adminMFAService.ts
+  80:65  warning  'secret' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/customerTrustAuthFlow.ts
+    8:10  warning  'createClient' is defined but never used                @typescript-eslint/no-unused-vars
+   12:10  warning  'createSessionRecord' is defined but never used         @typescript-eslint/no-unused-vars
+   13:10  warning  'deviceFingerprintGenerator' is defined but never used  @typescript-eslint/no-unused-vars
+  340:28  warning  'isReturningCustomer' is defined but never used         @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/generateMagicLink.ts
+  37:11  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/index.ts
+  218:1  warning  Assign instance to a variable before exporting as module default  import/no-anonymous-default-export
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/providers.ts
+  104:82  warning  'provider' is defined but never used  @typescript-eslint/no-unused-vars
+  227:82  warning  'provider' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/sessionManager.ts
+  74:13  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/sessionUtils.ts
+  2:10  warning  'randomBytes' is defined but never used           @typescript-eslint/no-unused-vars
+  2:23  warning  'createHash' is defined but never used            @typescript-eslint/no-unused-vars
+  3:26  warning  'createSupabaseClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth-system/tokenValidator.ts
+  112:32  warning  'token' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth/auth.ts
+  2:10  warning  'createClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/auth/withAuth.ts
+  3:10  warning  'cookies' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/booking/BookingFlowEngine.ts
+   25:3   warning  'TrustInjectionPoint' is defined but never used  @typescript-eslint/no-unused-vars
+  510:33  warning  'stateMachine' is defined but never used         @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/booking/ConversionHooks.ts
+   60:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+   77:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+   94:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  111:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  128:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  145:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  162:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  179:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  196:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+  216:20  warning  'ctx' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/booking/DropOffDetector.ts
+  433:11  warning  'totalEvents' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/booking/TrustTriggerMap.ts
+  320:3  warning  'customParams' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/notifications/customer-notification-service.ts
+  7:3  warning  'sendNotificationToList' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/notifications/onesignal-notification-service.ts
+  5:10  warning  'getAccessToken' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/notifications/parts-notification-service.ts
+  472:3  warning  'requestedById' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/pricing/api.ts
+  3:10  warning  'PricingClient' is defined but never used  @typescript-eslint/no-unused-vars
+  4:10  warning  'BaseRate' is defined but never used       @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/pricing/client.ts
+  1:10  warning  'SupabaseClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/alertNotifier.ts
+  174:63  warning  'target' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/auditLogger.ts
+  2:10  warning  'createHash' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/contextExtractor.ts
+  2:10  warning  'cookies' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/eventSources.ts
+  19:5  warning  'groupByField' is defined but never used  @typescript-eslint/no-unused-vars
+  52:5  warning  'groupByField' is defined but never used  @typescript-eslint/no-unused-vars
+  79:5  warning  'groupByField' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/test-audit-logging.ts
+  11:11  warning  'auditLogger' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/security/test-security-monitoring.ts
+  22:19  warning  'rulesData' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  35:19  warning  'alertsData' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  48:19  warning  'channelsData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/action-dispatcher.ts
+    5:15  warning  'AiRecommendation' is defined but never used      @typescript-eslint/no-unused-vars
+    7:10  warning  'ValueFunctionService' is defined but never used  @typescript-eslint/no-unused-vars
+  128:40  warning  'recommendationId' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/ai-orchestrator.ts
+   2:10  warning  'JAMES_TRONIC_CORE_PERSONA' is defined but never used  @typescript-eslint/no-unused-vars
+   3:10  warning  'GOVERNANCE_RULES' is defined but never used           @typescript-eslint/no-unused-vars
+   8:10  warning  'PolicyGuardService' is defined but never used         @typescript-eslint/no-unused-vars
+  25:9   warning  'pack' is never reassigned. Use 'const' instead        prefer-const
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/authenticated-service.ts
+  2:41  warning  'ActionLog' is defined but never used                  @typescript-eslint/no-unused-vars
+  4:10  warning  'dispatchNotificationEvent' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/context-builder.ts
+  59:9  warning  'supabase' is defined but never used    @typescript-eslint/no-unused-vars
+  60:9  warning  'entityType' is defined but never used  @typescript-eslint/no-unused-vars
+  61:9  warning  'entityId' is defined but never used    @typescript-eslint/no-unused-vars
+  93:9  warning  'entityId' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/customer-updates-service.ts
+  1:10  warning  'createClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/notificationRouter.ts
+  50:3  warning  'originalChannel' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/policy-guard.ts
+  4:10  warning  'createClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/supabase-service.ts
+  1:51  warning  'ActionLog' is defined but never used                  @typescript-eslint/no-unused-vars
+  3:10  warning  'dispatchNotificationEvent' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/services/value-function.ts
+   19:23  warning  'existingScore' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  102:46  warning  'context' is defined but never used                 @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/supabase/server.ts
+  22:20  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  31:20  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/trust/trust-copy.ts
+  86:63  warning  The `Function` type accepts any function-like value.
+Prefer explicitly defining any function parameters and return type  @typescript-eslint/no-unsafe-function-type
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/utils/device-fingerprint.ts
+  61:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  85:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/utils/enhanced-sla-utils.ts
+  275:11  warning  'adjustedElapsedTime' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mohammedamair/Downloads/JamesTronic_Prompt_Kit/james-tronic/src/lib/utils/performance-engine.ts
+  3:3  warning  'calculateTotalAdjustedSLA' is defined but never used  @typescript-eslint/no-unused-vars
+  6:3  warning  'getSLATarget' is defined but never used               @typescript-eslint/no-unused-vars
+
+✖ 492 problems (3 errors, 489 warnings)
+  0 errors and 10 warnings potentially fixable with the `--fix` option.
+
