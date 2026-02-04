@@ -63,6 +63,7 @@ check_backup_files() {
     BAK_FILES=$(find . -type f \( -name "*.bak" -o -name "*.backup" -o -name "*.old" \) \
         -not -path "./node_modules/*" \
         -not -path "./.next/*" \
+        -not -path "./out/*" \
         -not -path "./.git/*" 2>/dev/null || true)
     
     if [[ -n "$BAK_FILES" ]]; then

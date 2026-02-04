@@ -1,0 +1,132 @@
+{
+    "repo_meta": {
+        "branch": "main",
+        "commit_head": "unknown_no_git_access",
+        "generated_at": "2026-01-06T01:35:00+05:30"
+    },
+    "governance_invariants_check": {
+        "otp_first_auth": "pass",
+        "device_lock": "pass",
+        "rls_everywhere": "pass",
+        "pwa_offline_integrity": "pass",
+        "no_auto_punish": "warning",
+        "no_public_shaming": "pass",
+        "auditability": "pass"
+    },
+    "chapters": [
+        {
+            "chapter_id": "C15",
+            "claimed_status": "completed",
+            "evidence": {
+                "db_migrations": [
+                    "20260103120000_c15_ai_brain_tables.sql"
+                ],
+                "tables_views": [
+                    "ai_audit_logs"
+                ],
+                "api_files": [
+                    "src/app/api/admin/ai/model-config"
+                ],
+                "verdict": "MVP_CODE"
+            },
+            "dependency_alignment": {
+                "dependencies_found": [
+                    "C14"
+                ],
+                "dependencies_missing": []
+            },
+            "governance_gaps": []
+        },
+        {
+            "chapter_id": "C17",
+            "claimed_status": "completed (foundation)",
+            "evidence": {
+                "db_migrations": [
+                    "20260104100000_c17_workforce_hr_foundation.sql",
+                    "20260104100001_c17_workforce_rpcs.sql"
+                ],
+                "tables_views": [
+                    "technician_performance",
+                    "attendance_logs"
+                ],
+                "ui_routes": [
+                    "src/app/(admin)/app/technicians"
+                ],
+                "verdict": "MVP_CODE"
+            },
+            "dependency_alignment": {
+                "dependencies_found": [
+                    "C7.5",
+                    "C16"
+                ],
+                "dependencies_missing": []
+            },
+            "governance_gaps": []
+        },
+        {
+            "chapter_id": "C22",
+            "claimed_status": "completed (foundation)",
+            "evidence": {
+                "db_migrations": [
+                    "20260105500000_c22_fraud_detection.sql"
+                ],
+                "tables_views": [
+                    "fraud_alerts",
+                    "actor_risk_scores",
+                    "investigation_cases"
+                ],
+                "rpcs_triggers": [
+                    "rpc_calculate_actor_risk",
+                    "rpc_suspend_actor"
+                ],
+                "rls_policies": [
+                    "fraud_alerts:Admin can manage fraud_alerts"
+                ],
+                "verdict": "MVP_CODE"
+            },
+            "dependency_alignment": {
+                "dependencies_found": [
+                    "C17",
+                    "C18"
+                ],
+                "dependencies_missing": []
+            },
+            "governance_gaps": [
+                "Auto-suspend capability exists (rpc_suspend_actor parameter is_automatic) - requires strict policy enforcement."
+            ]
+        },
+        {
+            "chapter_id": "C40",
+            "claimed_status": "completed (foundation)",
+            "evidence": {
+                "db_migrations": [
+                    "20260106010000_c40_ai_governance.sql"
+                ],
+                "tables_views": [
+                    "compliance_policies",
+                    "compliance_violations"
+                ],
+                "rpcs_triggers": [
+                    "rpc_get_compliance_overview"
+                ],
+                "verdict": "MVP_CODE"
+            },
+            "dependency_alignment": {
+                "dependencies_found": [
+                    "C11",
+                    "C22"
+                ],
+                "dependencies_missing": []
+            },
+            "governance_gaps": [
+                "RLS policies applied via 20260106040000_fix_c40_rls.sql"
+            ]
+        }
+    ],
+    "top_risks": [
+        "Auto-punish capability in C22 needs strict oversight to prevent algorthmic bias or unfair suspensions."
+    ],
+    "recommended_recovery_plan": [
+        "Verify no code calls rpc_suspend_actor with is_automatic=true without a manual review step."
+    ]
+}

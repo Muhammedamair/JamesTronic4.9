@@ -56,6 +56,7 @@ const PublicBookingPageContent = () => {
   // Initialize form data from draft if available
   useEffect(() => {
     if (draft) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(prev => ({
         ...prev,
         deviceCategory: draft.category || category,

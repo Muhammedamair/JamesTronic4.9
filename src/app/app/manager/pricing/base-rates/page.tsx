@@ -21,19 +21,15 @@ export default function BaseRatesPage() {
     const { user } = useSupabase(); // Get context for City ID (Manager) or Filter (Admin)
     const router = useRouter();
 
+    const [selectedRate, setSelectedRate] = useState<any>(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
     const loadRates = async () => {
         setLoading(true);
         try {
-            // If manager, we pull from user context. If admin, we ideally default to a city selector (P4.3).
-            // For now, P4.2 Wave 2, we assume we fetch for the user's implicit scope or a test city.
             const cityId = user?.app_metadata?.city_id || user?.user_metadata?.city_id;
-            if (!cityId && user?.app_metadata?.app_role === 'manager') {
-                // Blocked state handled by layout usually, but here we show empty
-                return;
-            }
+            if (!cityId && user?.app_metadata?.app_role === 'manager') return;
 
-            // If admin and no city selected, we might fetch all (but that's huge).
-            // We'll stub with a valid city_id if admin, or url param.
             const params = new URLSearchParams();
             if (cityId) params.set('city_id', cityId);
 
@@ -49,6 +45,16 @@ export default function BaseRatesPage() {
     useEffect(() => {
         if (user) loadRates();
     }, [user]);
+
+    const handleOpenRevision = (item: any) => {
+        setSelectedRate(item);
+        setIsDrawerOpen(true);
+    };
+
+    const handleSuccess = () => {
+        setIsDrawerOpen(false);
+        loadRates();
+    };
 
     const columns: ColumnDef<any>[] = [
         { header: 'Service Code', accessorKey: 'service_code', className: 'font-mono text-violet-300' },
@@ -92,16 +98,39 @@ export default function BaseRatesPage() {
                 columns={columns}
                 loading={loading}
                 auditEntityBase="base_rates"
-                actions={(item) => (
-                    <RevisionDrawerTrigger item={item} onSuccess={loadRates} />
-                )}
+                actions={(item) => [
+                    {
+                        label: 'Create Revision',
+                        icon: History,
+                        onClick: (i) => handleOpenRevision(i),
+                        className: 'text-emerald-400 focus:text-emerald-300 focus:bg-emerald-950/20'
+                    }
+                ]}
             />
+
+            {selectedRate && (
+                <BaseRateRevisionDrawer
+                    item={selectedRate}
+                    isOpen={isDrawerOpen}
+                    onOpenChange={setIsDrawerOpen}
+                    onSuccess={handleSuccess}
+                />
+            )}
         </>
     );
 }
 
-function RevisionDrawerTrigger({ item, onSuccess }: { item: any, onSuccess: () => void }) {
-    const [open, setOpen] = useState(false);
+function BaseRateRevisionDrawer({
+    item,
+    isOpen,
+    onOpenChange,
+    onSuccess
+}: {
+    item: any,
+    isOpen: boolean,
+    onOpenChange: (open: boolean) => void,
+    onSuccess: () => void
+}) {
     const [reason, setReason] = useState('');
     const [form, setForm] = useState({
         labor: item.labor_base,
@@ -110,6 +139,19 @@ function RevisionDrawerTrigger({ item, onSuccess }: { item: any, onSuccess: () =
         markup: item.parts_markup_pct
     });
     const [submitting, setSubmitting] = useState(false);
+
+    // Reset when item changes
+    useEffect(() => {
+        if (isOpen && item) {
+            setForm({
+                labor: item.labor_base,
+                diagnostic: item.diagnostic_fee,
+                transport: item.transport_base,
+                markup: item.parts_markup_pct
+            });
+            setReason('');
+        }
+    }, [item, isOpen]);
 
     const handleSubmit = async () => {
         setSubmitting(true);
@@ -124,7 +166,7 @@ function RevisionDrawerTrigger({ item, onSuccess }: { item: any, onSuccess: () =
                 effective_from: new Date().toISOString(), // Immediate
                 reason
             });
-            setOpen(false);
+            onOpenChange(false);
             onSuccess();
         } catch (err) {
             alert('Failed to create revision: ' + err);
@@ -134,13 +176,7 @@ function RevisionDrawerTrigger({ item, onSuccess }: { item: any, onSuccess: () =
     };
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 h-8 px-2 text-xs">
-                    <History className="w-3.5 h-3.5 mr-2" />
-                    Create Revision
-                </Button>
-            </DrawerTrigger>
+        <Drawer open={isOpen} onOpenChange={onOpenChange}>
             <DrawerContent className="bg-slate-950 border-slate-800 text-slate-200">
                 <div className="mx-auto w-full max-w-4xl">
                     <DrawerHeader>
@@ -245,7 +281,7 @@ function RevisionDrawerTrigger({ item, onSuccess }: { item: any, onSuccess: () =
 
                     <DrawerFooter className="border-t border-slate-800 pt-4">
                         <div className="flex justify-end gap-3 w-full max-w-4xl mx-auto">
-                            <Button variant="outline" onClick={() => setOpen(false)} className="border-slate-700 hover:bg-slate-800">Cancel</Button>
+                            <Button variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 hover:bg-slate-800">Cancel</Button>
                             <Button
                                 onClick={handleSubmit}
                                 disabled={submitting || !reason}

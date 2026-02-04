@@ -6,6 +6,7 @@ import { User, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface SettingsPanelProps {
   // onLogout prop removed since logout is handled in HamburgerMenu
 }

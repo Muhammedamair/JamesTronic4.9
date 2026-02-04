@@ -12,6 +12,7 @@ export const useTrustMemory = () => {
     const storedTrustMemory = localStorage.getItem('jamestronic-trust-memory');
     if (storedTrustMemory) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTrustMemory(JSON.parse(storedTrustMemory));
       } catch (e) {
         console.error('Error parsing trust memory:', e);

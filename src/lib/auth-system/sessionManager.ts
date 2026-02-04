@@ -1,6 +1,6 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import { randomBytes, createHash } from 'crypto';
+import crypto, { randomBytes, createHash } from 'crypto';
 
 // Session configuration
 const SESSION_CONFIG = {
@@ -16,7 +16,7 @@ const SESSION_CONFIG = {
   COOKIE_OPTIONS: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
+    sameSite: 'lax' as const,
     path: '/',
   },
 } as const;
@@ -74,7 +74,7 @@ export class SessionManager {
       const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
       // Generate session and refresh tokens
-      const sessionId = randomBytes(32).toString('hex');
+      const sessionId = crypto.randomUUID(); // Use UUID to match database schema
       const refreshToken = randomBytes(32).toString('hex');
       const refreshTokenHash = createHash('sha256').update(refreshToken).digest('hex');
 
@@ -89,9 +89,6 @@ export class SessionManager {
 
       const refreshExpiresAt = new Date();
       refreshExpiresAt.setDate(refreshExpiresAt.getDate() + SESSION_CONFIG.REFRESH_EXPIRY);
-
-      // Insert session into database using service role
-      const { error } = await supabase.rpc('get_my_profile_id'); // Check if we have valid auth context first
 
       // Use service role to insert session - bypass RLS
       const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -122,7 +119,7 @@ export class SessionManager {
       }
 
       // Set cookies
-      const cookieStore = cookies() as any; // Handle type issue in build
+      const cookieStore = await cookies();
       cookieStore.set('session_id', sessionId, {
         ...SESSION_CONFIG.COOKIE_OPTIONS,
         expires: expiresAt,
@@ -149,20 +146,31 @@ export class SessionManager {
   }
 
   /**
-   * Validate an existing session using the session cookie
+    * Validate an existing session using the session cookie
+   * @param cookieStoreOptional - Optional cookie store (e.g., from Middleware request.cookies)
    */
-  static async validateSession(): Promise<ValidateSessionResponse> {
+  static async validateSession(cookieStoreOptional?: any): Promise<ValidateSessionResponse> {
     try {
-      const cookieStore = cookies() as any; // Handle type issue
-      const sessionId = cookieStore.get('session_id')?.value;
+      // DEBUG LOGGING START
+      console.log('[SessionManager] validateSession called');
+      const cookieStore = cookieStoreOptional || await cookies();
+      const sessionCookie = cookieStore.get('session_id');
+      const sessionId = sessionCookie?.value;
+
+      console.log(`[SessionManager] Check: ID=${sessionId ? 'FOUND' : 'MISSING'} Cookie=${sessionCookie ? 'YES' : 'NO'}`);
 
       if (!sessionId) {
+        console.log('[SessionManager] No session ID found');
         return { valid: false, error: 'No session cookie found' };
       }
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+      console.log(`[SessionManager] querying DB for ID: ${sessionId}`);
+
+      // Use service role to query session - bypass RLS
+      // RLS likely prevents anon from seeing user_sessions before authentication
+      const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+      const supabase = createSupabaseClient(serviceRoleUrl, serviceRoleKey);
 
       // Get session from database
       const { data: session, error } = await supabase
@@ -171,15 +179,24 @@ export class SessionManager {
         .eq('id', sessionId)
         .single();
 
-      if (error || !session) {
+      if (error) {
+        console.error(`[SessionManager] DB Error:`, error);
+        return { valid: false, error: 'Session not found' };
+      }
+
+      if (!session) {
+        console.log(`[SessionManager] Session not found in DB`);
         return { valid: false, error: 'Session not found' };
       }
 
       // Check if session is revoked
       if (session.revoked) {
+        console.log(`[SessionManager] Session revoked`);
         // Clear cookies
-        (cookieStore as any).delete('session_id');
-        (cookieStore as any).delete('refresh_token');
+        if (cookieStore.delete) {
+          (cookieStore as any).delete('session_id');
+          (cookieStore as any).delete('refresh_token');
+        }
         return { valid: false, error: 'Session revoked' };
       }
 
@@ -188,11 +205,16 @@ export class SessionManager {
       const expiresAt = new Date(session.expires_at);
 
       if (expiresAt < now) {
+        console.log(`[SessionManager] Session expired at ${expiresAt}`);
         // Session expired, clear cookies
-        (cookieStore as any).delete('session_id');
-        (cookieStore as any).delete('refresh_token');
+        if (cookieStore.delete) {
+          (cookieStore as any).delete('session_id');
+          (cookieStore as any).delete('refresh_token');
+        }
         return { valid: false, error: 'Session expired' };
       }
+
+      console.log(`[SessionManager] Session VALID for user ${session.user_id} (${session.role})`);
 
       // Return valid session data
       const sessionData: SessionData = {
@@ -207,7 +229,7 @@ export class SessionManager {
 
       return { valid: true, session: sessionData };
     } catch (error) {
-      console.error('Error in validateSession:', error);
+      console.error('[SessionManager] Critical Error in validateSession:', error);
       return { valid: false, error: 'Internal server error' };
     }
   }
@@ -217,7 +239,7 @@ export class SessionManager {
    */
   static async refreshSession(): Promise<RefreshSessionResponse> {
     try {
-      const cookieStore = cookies() as any; // Handle type issue
+      const cookieStore = await cookies();
       const refreshTokenCookie = cookieStore.get('refresh_token')?.value;
 
       if (!refreshTokenCookie) {
@@ -225,9 +247,11 @@ export class SessionManager {
       }
 
       const refreshTokenHash = createHash('sha256').update(refreshTokenCookie).digest('hex');
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+      // Use service role to find session - bypass RLS
+      const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+      const supabase = createSupabaseClient(serviceRoleUrl, serviceRoleKey);
 
       // Find active session by refresh token hash
       const { data: session, error } = await supabase
@@ -271,13 +295,8 @@ export class SessionManager {
       const newExpiresAt = new Date();
       newExpiresAt.setHours(newExpiresAt.getHours() + sessionExpiryHours);
 
-      // Use service role to update the database with the new session
-      const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-      const serviceRoleSupabase = createSupabaseClient(serviceRoleUrl, serviceRoleKey); // service role client
-
       // Update the old session to mark it as revoked and update the refresh token hash
-      const { error: updateError } = await serviceRoleSupabase
+      const { error: updateError } = await supabase
         .from('user_sessions')
         .update({
           revoked: true,
@@ -290,7 +309,7 @@ export class SessionManager {
       }
 
       // Insert the new session
-      const { error: insertError } = await serviceRoleSupabase
+      const { error: insertError } = await supabase
         .from('user_sessions')
         .insert({
           id: newSessionId,
@@ -337,7 +356,7 @@ export class SessionManager {
    */
   static async revokeSession(sessionId?: string): Promise<boolean> {
     try {
-      const cookieStore = cookies() as any; // Handle type issue
+      const cookieStore = await cookies();
 
       if (!sessionId) {
         sessionId = cookieStore.get('session_id')?.value;
@@ -349,10 +368,6 @@ export class SessionManager {
         (cookieStore as any).delete('refresh_token');
         return true;
       }
-
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
       // Use service role to update the database
       const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -367,7 +382,7 @@ export class SessionManager {
 
       if (error) {
         console.error('Error revoking session:', error);
-        return false;
+        // Even if DB update fails, clear cookies
       }
 
       // Clear cookies
@@ -386,16 +401,17 @@ export class SessionManager {
    */
   static async getSessionData(): Promise<SessionData | null> {
     try {
-      const cookieStore = cookies() as any; // Handle type issue
+      const cookieStore = await cookies();
       const sessionId = cookieStore.get('session_id')?.value;
 
       if (!sessionId) {
         return null;
       }
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+      // Use service role to get session - bypass RLS
+      const serviceRoleUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+      const supabase = createSupabaseClient(serviceRoleUrl, serviceRoleKey);
 
       const { data: session, error } = await supabase
         .from('user_sessions')

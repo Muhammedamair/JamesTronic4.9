@@ -35,6 +35,14 @@ export interface ColumnDef<T> {
     className?: string;
 }
 
+export interface TableAction<T> {
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    onClick: (item: T) => void;
+    className?: string;
+    show?: (item: T) => boolean;
+}
+
 interface DenseDataTableProps<T> {
     data: T[];
     columns: ColumnDef<T>[];
@@ -42,7 +50,7 @@ interface DenseDataTableProps<T> {
     page?: number;
     totalPages?: number;
     onPageChange?: (page: number) => void;
-    actions?: (item: T) => React.ReactNode; // Custom actions
+    actions?: (item: T) => TableAction<T>[];
     auditEntityBase?: string; // e.g. "pricing_quotes"
     getAuditId?: (item: T) => string; // Function to extract ID for audit link
 }
@@ -104,10 +112,23 @@ export function DenseDataTable<T extends { id?: string }>({
                                                 <MoreHorizontal className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-slate-200">
+                                        <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-slate-200 min-w-[160px]">
                                             <DropdownMenuLabel className="text-xs text-slate-500 uppercase">Actions</DropdownMenuLabel>
 
-                                            {actions && actions(item)}
+                                            {actions && actions(item).map((action, actionIdx) => {
+                                                if (action.show && !action.show(item)) return null;
+                                                const Icon = action.icon;
+                                                return (
+                                                    <DropdownMenuItem
+                                                        key={actionIdx}
+                                                        onClick={() => action.onClick(item)}
+                                                        className={cn("cursor-pointer", action.className)}
+                                                    >
+                                                        {Icon && <Icon className="w-3.5 h-3.5 mr-2" />}
+                                                        {action.label}
+                                                    </DropdownMenuItem>
+                                                );
+                                            })}
 
                                             {/* Safety Refinement: Audit Deep Link */}
                                             <DropdownMenuItem asChild>

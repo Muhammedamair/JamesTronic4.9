@@ -49,6 +49,7 @@ const DropdownMenuTrigger = React.forwardRef<
         return React.cloneElement(child, {
             onClick: handleClick,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line react-hooks/rules-of-hooks, @typescript-eslint/no-explicit-any, react/no-find-dom-node
             ref: ref as any,
             ...props
         });

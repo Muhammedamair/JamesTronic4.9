@@ -30,6 +30,7 @@ export const PersistentTrustStrip = ({ onShowDetails }: PersistentTrustStripProp
         !['completed', 'delivered', 'closed', 'cancelled'].includes(ticket.status?.toLowerCase())
       ) || customerTickets[0]; // fallback to first ticket if none are active
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTicket(activeTicket);
       setHasActiveTicket(true);
 
@@ -104,11 +105,10 @@ export const PersistentTrustStrip = ({ onShowDetails }: PersistentTrustStripProp
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <StatusIcon className={`w-5 h-5 ${
-                trustStatus.status === 'breached' ? 'text-red-600' :
-                trustStatus.status === 'at_risk' ? 'text-yellow-600' :
-                trustStatus.status === 'parts_needed' ? 'text-orange-600' : 'text-green-600'
-              }`} />
+              <StatusIcon className={`w-5 h-5 ${trustStatus.status === 'breached' ? 'text-red-600' :
+                  trustStatus.status === 'at_risk' ? 'text-yellow-600' :
+                    trustStatus.status === 'parts_needed' ? 'text-orange-600' : 'text-green-600'
+                }`} />
               <span className="font-medium">
                 {hasActiveTicket && activeTicket
                   ? `${activeTicket.device_category} ${activeTicket.brand ? `- ${activeTicket.brand}` : ''}`
@@ -117,19 +117,19 @@ export const PersistentTrustStrip = ({ onShowDetails }: PersistentTrustStripProp
             </div>
             <Badge
               variant={trustStatus.status === 'breached' ? 'destructive' :
-                      trustStatus.status === 'at_risk' ? 'secondary' :
-                      trustStatus.status === 'parts_needed' ? 'outline' : 'default'}
+                trustStatus.status === 'at_risk' ? 'secondary' :
+                  trustStatus.status === 'parts_needed' ? 'outline' : 'default'}
               className={`
                 ${trustStatus.status === 'breached' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200' :
                   trustStatus.status === 'at_risk' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' :
-                  trustStatus.status === 'parts_needed' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200' :
-                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'}
+                    trustStatus.status === 'parts_needed' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200' :
+                      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'}
               `}
             >
               {trustStatus.status === 'breached' ? 'BREACHED' :
-               trustStatus.status === 'at_risk' ? 'AT RISK' :
-               trustStatus.status === 'parts_needed' ? 'PARTS NEEDED' :
-               trustStatus.status === 'no_tickets' ? 'NO ACTIVE REPAIRS' : 'ON TRACK'}
+                trustStatus.status === 'at_risk' ? 'AT RISK' :
+                  trustStatus.status === 'parts_needed' ? 'PARTS NEEDED' :
+                    trustStatus.status === 'no_tickets' ? 'NO ACTIVE REPAIRS' : 'ON TRACK'}
             </Badge>
           </div>
 

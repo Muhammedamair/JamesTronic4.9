@@ -1,0 +1,75 @@
+{
+    "baseUrl": "http://localhost:3000",
+    "authHeader": {
+        "name": "Authorization",
+        "value": "Bearer ${C19_AUTH_TOKEN}"
+    },
+    "tenantA": {
+        "id": "tenant_a",
+        "authTokenEnv": "C19_AUTH_TOKEN_TENANT_A"
+    },
+    "tenantB": {
+        "id": "tenant_b",
+        "authTokenEnv": "C19_AUTH_TOKEN_TENANT_B"
+    },
+    "performance": {
+        "iterations": 80,
+        "warmup": 10,
+        "endpoints": {
+            "dashboardSummary": {
+                "method": "GET",
+                "path": "/api/admin/inventory/dashboard/summary"
+            },
+            "reorderQueue": {
+                "method": "GET",
+                "path": "/api/admin/inventory/reorders/queue"
+            },
+            "partDeepDive": {
+                "method": "GET",
+                "path": "/api/admin/inventory/parts/${partId}/deep-dive",
+                "partId": "PART_1"
+            },
+            "locationDeepDive": {
+                "method": "GET",
+                "path": "/api/admin/inventory/locations/${locationId}/deep-dive",
+                "locationId": "LOC_1"
+            }
+        }
+    },
+    "jobs": {
+        "computeDemand": {
+            "method": "POST",
+            "path": "/api/admin/inventory/compute-demand"
+        },
+        "computeForecast": {
+            "method": "POST",
+            "path": "/api/admin/inventory/generate-forecasts"
+        },
+        "generateReorders": {
+            "method": "POST",
+            "path": "/api/admin/inventory/reorders/generate"
+        }
+    },
+    "forecastData": {
+        "method": "GET",
+        "path": "/api/admin/inventory/forecast/holdout-results?window=${window}",
+        "windows": [
+            "7d",
+            "30d"
+        ]
+    },
+    "offlineReplay": {
+        "ingest": {
+            "method": "POST",
+            "path": "/api/admin/inventory/events/ingest"
+        },
+        "replay": {
+            "method": "POST",
+            "path": "/api/admin/inventory/events/replay"
+        },
+        "assert": {
+            "method": "GET",
+            "path": "/api/admin/inventory/events/assertions?runId=${runId}"
+        }
+    }
+}

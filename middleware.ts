@@ -10,21 +10,28 @@ export async function middleware(request: NextRequest) {
   }
 
   // Validate session using our new session manager
-  const validationResponse = await SessionManager.validateSession();
+  // Pass request.cookies because `next/headers` cookies() is not available in Middleware
+  // DEBUG LOGGING START
+  console.log(`[Middleware] Checking session for ${request.nextUrl.pathname}`);
+  const validationResponse = await SessionManager.validateSession(request.cookies);
+  console.log(`[Middleware] Result for ${request.nextUrl.pathname}:`, validationResponse.valid ? 'VALID' : `INVALID-${validationResponse.error}`);
 
   if (!validationResponse.valid) {
     // If session is invalid, check if we can refresh it
     if (validationResponse.error &&
-        (validationResponse.error.includes('expired') || validationResponse.error.includes('Session not found'))) {
+      (validationResponse.error.includes('expired') || validationResponse.error.includes('Session not found'))) {
       try {
+        console.log('[Middleware] Attempting refresh...');
         const refreshResponse = await SessionManager.refreshSession();
         if (!refreshResponse.success) {
+          console.log('[Middleware] Refresh FAILED');
           // If refresh failed, clear cookies and redirect to login
           const response = NextResponse.redirect(new URL('/login', request.url));
           response.cookies.set('session_id', '', { maxAge: 0 });
           response.cookies.set('refresh_token', '', { maxAge: 0 });
           return response;
         } else {
+          console.log('[Middleware] Refresh SUCCESS');
           // If refresh succeeded, continue with the request
           // Get the updated session data
           const updatedSessionData = await SessionManager.getSessionData();
@@ -38,21 +45,23 @@ export async function middleware(request: NextRequest) {
     if (!validationResponse.valid) {
       // Define public routes (no authentication required)
       const isPublicRoute = request.nextUrl.pathname === '/' ||
-                           request.nextUrl.pathname === '/api/auth/callback' ||
-                           request.nextUrl.pathname.startsWith('/auth/') ||
-                           request.nextUrl.pathname.startsWith('/api/otp') ||
-                           request.nextUrl.pathname.startsWith('/api/webhook') ||
-                           request.nextUrl.pathname.startsWith('/login') ||
-                           request.nextUrl.pathname.startsWith('/admin/login');
+        request.nextUrl.pathname === '/api/auth/callback' ||
+        request.nextUrl.pathname.startsWith('/auth/') ||
+        request.nextUrl.pathname.startsWith('/api/otp') ||
+        request.nextUrl.pathname.startsWith('/api/webhook') ||
+        request.nextUrl.pathname.startsWith('/login') ||
+        request.nextUrl.pathname.startsWith('/admin/login');
 
       if (isPublicRoute) {
         return NextResponse.next();
       }
 
+      console.log(`[Middleware] REDIRECTING ${request.nextUrl.pathname} -> /login (reason: ${validationResponse.error})`);
+
       // For protected routes, redirect to appropriate login
       // For admin routes, redirect to admin login
       if (request.nextUrl.pathname.startsWith('/admin') ||
-          request.nextUrl.pathname.startsWith('/app')) {
+        request.nextUrl.pathname.startsWith('/app')) {
         const url = request.nextUrl.clone();
         url.pathname = '/admin/login';
         return NextResponse.redirect(url);
@@ -82,7 +91,7 @@ export async function middleware(request: NextRequest) {
   if (resolvedRole === 'technician' || resolvedRole === 'transporter') {
     // Get device fingerprint from request headers or cookies
     const deviceFingerprint = request.headers.get('x-device-fingerprint') ||
-                              request.cookies.get('device_fingerprint')?.value;
+      request.cookies.get('device_fingerprint')?.value;
 
     if (!deviceFingerprint) {
       // If no device fingerprint is provided, block access for technicians and transporters
@@ -118,7 +127,7 @@ export async function middleware(request: NextRequest) {
         // Device mismatch - potential conflict
         // Log the device conflict
         const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                        request.headers.get('x-real-ip') || 'unknown';
+          request.headers.get('x-real-ip') || 'unknown';
         const userAgent = request.headers.get('user-agent') || 'unknown';
 
         const { error: conflictError } = await supabase

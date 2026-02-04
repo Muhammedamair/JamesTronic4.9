@@ -20,6 +20,11 @@ export async function GET(request: Request) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const role = session.user.app_metadata?.app_role;
+    if (!['admin', 'super_admin', 'manager'].includes(role)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     // Fetch rulesets
     // RLS will automatically filter:
     // - Managers: Only sees is_active=true rows

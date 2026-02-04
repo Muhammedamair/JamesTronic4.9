@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Menu, X, LogOut, Bell, Search, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useSupabase } from '@/components/shared/supabase-provider';
+// import { useSupabase } from '@/components/shared/supabase-provider'; // Removed Supabase dependency
+import { useLogout } from '@/lib/auth-system/sessionHooks';
 import { useRouter } from 'next/navigation';
 import { AdminNavigation } from './AdminNavigation';
 
@@ -21,13 +22,14 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   sidebarOpen = false
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { supabase, user } = useSupabase();
+  // const { supabase, user } = useSupabase(); // Unused
+  const { logout } = useLogout();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
+    await logout();
+    // Router push is handled inside useLogout / logout function usually, but safe to keep here or rely on hook
+    // usage in hook: router.push('/login');
   };
 
   // Close mobile menu when navigating

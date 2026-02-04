@@ -15,7 +15,7 @@ export default function MfaChallengePage() {
   const [mfaCode, setMfaCode] = useState('');
   const [countdown, setCountdown] = useState(30);
 
-  const inputRefs = Array(6).fill(null).map(() => useRef<HTMLInputElement>(null));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Handle MFA input - move to next field when 1 digit is entered
   const handleMfaInput = (index: number, value: string) => {
@@ -27,7 +27,7 @@ export default function MfaChallengePage() {
 
       // Move to next input if digit was entered and not on the last input
       if (value && index < 5) {
-        inputRefs[index + 1].current?.focus();
+        inputRefs.current[index + 1]?.focus();
       }
     }
   };
@@ -35,7 +35,7 @@ export default function MfaChallengePage() {
   // Handle backspace to move to previous input
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !mfaCode[index] && index > 0) {
-      inputRefs[index - 1].current?.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -128,7 +128,7 @@ export default function MfaChallengePage() {
                   .map((_, index) => (
                     <Input
                       key={index}
-                      ref={inputRefs[index]}
+                      ref={(el) => { inputRefs.current[index] = el; }}
                       type="tel"
                       inputMode="numeric"
                       maxLength={1}

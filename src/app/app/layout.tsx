@@ -1,33 +1,39 @@
-// With middleware handling auth, this layout is for authenticated admin/staff users only
-'use client';
-
-import { ReactNode, useState } from 'react';
-import { AdminHeader } from '@/components/admin/layout/AdminHeader';
-import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
+import React from 'react';
+import { SessionManager } from '@/lib/auth-system/sessionManager';
 import { SessionProvider } from '@/lib/auth-system/sessionHooks';
+import AppShell from './AppShell';
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
-export default function AppLayout({
-  children,
+export default async function AppLayout({
+    children,
 }: {
-  children: ReactNode;
+    children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+    // 1. Validate Session Server-Side
+    // We pass 'cookies()' explicitly if needed, but validateSession defaults to it.
+    const validation = await SessionManager.validateSession();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+    // 2. Handle Invalid Session
+    if (!validation.valid || !validation.session) {
+        redirect('/login');
+    }
 
-  return (
-    <SessionProvider>
-      <div className="min-h-screen flex flex-col md:flex-row">
-        <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-        <div className="flex-1 md:ml-0">
-          <AdminHeader sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} />
-          <main className="flex-grow container mx-auto px-4 py-6">
-            {children}
-          </main>
-        </div>
-      </div>
-    </SessionProvider>
-  );
+    // 3. Extract Session Data
+    const sessionData = validation.session;
+    const userRole = sessionData.role;
+
+    // 4. Pass Server-Side Session to Client Provider
+    // This "hydrates" the SessionProvider immediately, preventing the "flicker"
+    // where it thinks you are logged out for a split second.
+    return (
+        <SessionProvider
+            initialSession={sessionData}
+            initialRole={userRole}
+        >
+            <AppShell>
+                {children}
+            </AppShell>
+        </SessionProvider>
+    );
 }

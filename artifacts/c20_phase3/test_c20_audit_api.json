@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "test": "Unauthenticated returns 401",
+      "passed": true
+    },
+    {
+      "test": "Technician returns 403",
+      "passed": true
+    },
+    {
+      "test": "Manager gets 200 OK",
+      "passed": true
+    },
+    {
+      "test": "Response has correct shape",
+      "passed": true
+    },
+    {
+      "test": "Pagination defaults work",
+      "passed": true
+    },
+    {
+      "test": "city_id filter works",
+      "passed": true
+    },
+    {
+      "test": "event_type filter works",
+      "passed": true
+    }
+  ],
+  "passed": 7,
+  "total": 7
+}

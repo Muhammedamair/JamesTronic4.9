@@ -110,16 +110,14 @@ export default function GuardrailsPage() {
                 columns={columns}
                 loading={loading}
                 auditEntityBase="guardrails"
-                actions={(item) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() => handleOpenRevision(item)}
-                        className="w-full justify-start text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 h-8 px-2 text-xs"
-                    >
-                        <Shield className="w-3.5 h-3.5 mr-2" />
-                        Revise Limits
-                    </Button>
-                )}
+                actions={(item) => [
+                    {
+                        label: 'Revise Limits',
+                        icon: Shield,
+                        onClick: (i) => handleOpenRevision(i),
+                        className: 'text-emerald-400 focus:text-emerald-300 focus:bg-emerald-950/20'
+                    }
+                ]}
             />
 
             {/* Render Drawer Outside Table Context */}

@@ -52,6 +52,7 @@ export const ZoneDrawer: React.FC<ZoneDrawerProps> = ({ zone, action, onClose, o
     if (zone) {
       setValue('name', zone.name);
       setValue('description', zone.description || '');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPincodes(zone.pincodes || []);
     } else {
       reset({
@@ -152,7 +153,7 @@ export const ZoneDrawer: React.FC<ZoneDrawerProps> = ({ zone, action, onClose, o
                 Add
               </Button>
             </div>
-            
+
             {/* Display added pincodes as badges */}
             <div className="flex flex-wrap gap-2 mt-2">
               {pincodes.map((pincode, index) => (
@@ -168,7 +169,7 @@ export const ZoneDrawer: React.FC<ZoneDrawerProps> = ({ zone, action, onClose, o
                 </Badge>
               ))}
             </div>
-            
+
             {errors.pincodes && (
               <p className="text-sm text-red-600">{errors.pincodes.message}</p>
             )}
@@ -187,8 +188,8 @@ export const ZoneDrawer: React.FC<ZoneDrawerProps> = ({ zone, action, onClose, o
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting 
-                ? (action === 'create' ? 'Creating...' : 'Updating...') 
+              {isSubmitting
+                ? (action === 'create' ? 'Creating...' : 'Updating...')
                 : (action === 'create' ? 'Create Zone' : 'Update Zone')
               }
             </Button>

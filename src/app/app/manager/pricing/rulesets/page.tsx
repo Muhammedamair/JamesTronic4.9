@@ -54,8 +54,7 @@ export default function RulesetsPage() {
         setIsDrawerOpen(true);
     };
 
-    const handleOpenActivate = (item: any, e: React.MouseEvent) => {
-        e.stopPropagation();
+    const handleOpenActivate = (item: any) => {
         setSelectedRuleset(item);
         setShowActivationForm(true);
         setIsDrawerOpen(true);
@@ -113,27 +112,21 @@ export default function RulesetsPage() {
                 columns={columns}
                 loading={loading}
                 auditEntityBase="rulesets"
-                actions={(item) => (
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            onClick={() => handleOpenViewer(item)}
-                            className="h-8 px-2 text-xs text-slate-400 hover:text-white"
-                        >
-                            View JSON
-                        </Button>
-                        {isAdmin && !item.is_active && (
-                            <Button
-                                variant="ghost"
-                                onClick={(e) => handleOpenActivate(item, e)}
-                                className="h-8 px-2 text-xs text-amber-500 hover:text-amber-400 hover:bg-amber-950/20"
-                            >
-                                <Power className="w-3.5 h-3.5 mr-1" />
-                                Activate
-                            </Button>
-                        )}
-                    </div>
-                )}
+                actions={(item) => [
+                    {
+                        label: 'View JSON',
+                        icon: FileJson,
+                        onClick: (i) => handleOpenViewer(i),
+                        className: 'text-slate-400 focus:text-white'
+                    },
+                    {
+                        label: 'Activate',
+                        icon: Power,
+                        onClick: (i) => handleOpenActivate(i),
+                        className: 'text-amber-500 focus:text-amber-400 focus:bg-amber-950/20',
+                        show: (i) => isAdmin && !i.is_active
+                    }
+                ]}
             />
 
             {/* Ruleset Detail Drawer */}
@@ -175,7 +168,7 @@ function RulesetDrawer({
         }
     }, [isOpen]);
 
-    const isValid = reason.length > 5 && confirmText.trim() === item.version;
+    const isValid = reason.length >= 5 && confirmText.trim() === 'ACTIVATE';
 
     const handleActivate = async () => {
         if (!isValid) return;
@@ -253,12 +246,12 @@ function RulesetDrawer({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>Type <span className="font-mono text-violet-300 mx-1">{item.version}</span> to confirm</Label>
+                                        <Label>Type <span className="font-mono text-amber-500 mx-1">ACTIVATE</span> to confirm</Label>
                                         <Input
                                             value={confirmText}
                                             onChange={e => setConfirmText(e.target.value)}
-                                            placeholder={item.version}
-                                            className="bg-slate-900 border-slate-700 font-mono text-center tracking-widest"
+                                            placeholder="ACTIVATE"
+                                            className="bg-slate-900 border-slate-700 font-mono text-center tracking-widest focus:border-amber-500"
                                             onPaste={(e) => e.preventDefault()}
                                         />
                                     </div>

@@ -77,7 +77,7 @@ export default function OTPLoginPageWrapper() {
   const sanitizedRedirect = sanitizeRedirect(requestedRedirect);
 
   const contactInputRef = useRef<HTMLInputElement>(null);
-  const otpInputRefs = Array(6).fill(null).map(() => useRef<HTMLInputElement>(null));
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const normalizePhone = (phone: string): string => {
     const digitsOnly = phone.replace(/\D/g, '');
@@ -368,70 +368,24 @@ export default function OTPLoginPageWrapper() {
 
       const data = await verifyResponse.json();
 
-      if (verifyResponse.ok && data.ok !== false) {
-        // After successful OTP verification, we must create the session via our API
-        // to ensure device lock is checked and session cookies are properly set for SSR/middleware.
-
-        if (!data.user || !data.session?.access_token || !data.session?.refresh_token) {
-          console.error('Verification response missing user or session tokens');
-          setError('SESSION_ERROR');
-          toast({
-            title: 'Authentication Error',
-            description: 'Verification succeeded but essential user data was not returned. Please try again.',
-            variant: 'destructive',
-          });
-          setAuthState('OTP_SENT');
-          setLoading(false);
-          return;
-        }
-
-        // Set the Supabase session on the client side so the auth context/hooks update
-        await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
-
-        // ALWAYS call the session creation API. Use role from response or default to 'customer'.
-        const role = data.role || 'customer';
-        const userAgent = typeof window !== 'undefined' ? navigator.userAgent : 'web-generic';
-        const deviceFingerprint = `web-${btoa(userAgent.substring(0, 20)).substring(0, 10)}`;
-
-        const sessionResponse = await fetch('/api/auth/session/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: data.user.id,
-            role: data.role || 'customer',
-            deviceFingerprint: deviceFingerprint,
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            ipAddress: null, // Will be detected server-side
-            userAgent: userAgent
-          }),
-        });
-
-        const sessionResult = await sessionResponse.json();
-
-        if (!sessionResult.ok) {
-          console.error('Error creating session via API:', sessionResult);
-          setError('SESSION_ERROR');
-          toast({
-            title: 'Session Error',
-            description: sessionResult.message || 'There was an issue setting up your session. Please try again.',
-            variant: 'destructive',
-          });
-          setAuthState('OTP_SENT');
-          setLoading(false);
-          return;
-        }
-
-        // After successful OTP verification and session setup, redirect based on role
+      if (verifyResponse.ok && data.success) {
+        // After successful OTP verification
         setAuthState('AUTHED');
 
+        // Optional: If Supabase tokens are provided, set them (Hybrid mode)
+        if (data.session?.access_token && data.session?.refresh_token) {
+          await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+        }
+
+        // Logic for redirecting (moved out of nested API call)
         const userRole = data.role || 'customer';
+
+
         const dashboardRoute = getDashboardRouteForRole(userRole);
+        console.log('[OTP] Redirection Debug:', { userRole, dashboardRoute, sanitizedRedirect });
 
         if (sanitizedRedirect && sanitizedRedirect !== '/') {
           // Check if customer is trying to access restricted app routes
@@ -441,16 +395,19 @@ export default function OTPLoginPageWrapper() {
             sanitizedRedirect.startsWith('/staff')
           )) {
             // Force customers to their dashboard (Home)
-            router.push(dashboardRoute);
+            console.log('[OTP] Redirecting to dashboard (forced):', dashboardRoute);
+            window.location.href = dashboardRoute;
           } else {
             // Allow other redirects (e.g., deep links for authorized roles)
-            router.push(sanitizedRedirect);
+            console.log('[OTP] Redirecting to sanitizedRedirect:', sanitizedRedirect);
+            window.location.href = sanitizedRedirect;
           }
         } else {
           // No specific redirect requested, go to default dashboard
-          router.push(dashboardRoute);
+          console.log('[OTP] Redirecting to dashboard (default):', dashboardRoute);
+          window.location.href = dashboardRoute;
         }
-        console.log('[OTP] verify done'); // Dev-only console marker
+        console.log('[OTP] verify done - redirection initiated');
       } else {
         // Handle error response with request_id
         if (data.request_id) {
@@ -675,7 +632,7 @@ export default function OTPLoginPageWrapper() {
 
       // Move to next input if digit was entered and not on the last input
       if (value && index < 5) {
-        otpInputRefs[index + 1].current?.focus();
+        otpInputRefs.current[index + 1]?.focus();
       }
     }
   };
@@ -683,7 +640,7 @@ export default function OTPLoginPageWrapper() {
   // Handle backspace to move to previous input
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpInputRefs[index - 1].current?.focus();
+      otpInputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -697,7 +654,12 @@ export default function OTPLoginPageWrapper() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {currentStep === 'contact' ? (
+          {authState === 'AUTHED' ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm font-medium text-gray-600">Login successful! Redirecting...</p>
+            </div>
+          ) : currentStep === 'contact' ? (
             <div className="space-y-4">
               <div className="flex space-x-2 mb-4">
                 <Button
@@ -797,7 +759,7 @@ export default function OTPLoginPageWrapper() {
                     .map((_, index) => (
                       <Input
                         key={index}
-                        ref={otpInputRefs[index]}
+                        ref={(el) => { otpInputRefs.current[index] = el; }}
                         type="tel"
                         inputMode="numeric"
                         maxLength={1}

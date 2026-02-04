@@ -45,29 +45,6 @@ export function AiEventsTable({ refreshTrigger, onProcessComplete }: AiEventsTab
     const [batchSize, setBatchSize] = useState('3');
     const { toast } = useToast();
 
-    useEffect(() => {
-        fetchEvents();
-    }, [refreshTrigger, filterEntityType, searchId]); // Re-fetch when trigger changes
-
-    useEffect(() => {
-        // Real-time subscription
-        const supabase = createClient();
-        const channel = supabase
-            .channel('ai_events_changes')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'ai_events',
-            }, () => {
-                fetchEvents();
-            })
-            .subscribe();
-
-        return () => {
-            channel.unsubscribe();
-        };
-    }, []);
-
     async function fetchEvents() {
         setLoading(true);
         const supabase = createClient();
@@ -96,6 +73,32 @@ export function AiEventsTable({ refreshTrigger, onProcessComplete }: AiEventsTab
 
         setLoading(false);
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchEvents();
+    }, [refreshTrigger, filterEntityType, searchId]); // Re-fetch when trigger changes
+
+    useEffect(() => {
+        // Real-time subscription
+        const supabase = createClient();
+        const channel = supabase
+            .channel('ai_events_changes')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'ai_events',
+            }, () => {
+                fetchEvents();
+            })
+            .subscribe();
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, []);
+
+
 
     async function handleProcessEvents() {
         setIsProcessing(true);

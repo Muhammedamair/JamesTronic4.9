@@ -3,7 +3,7 @@
 import React, { ReactNode, useState } from 'react';
 import { AdminHeader } from '@/components/admin/layout/AdminHeader';
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
-import { useSupabase } from '@/components/shared/supabase-provider';
+import { useSession } from '@/lib/auth-system/sessionHooks'; // Use custom session hook
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,7 @@ export default function AdminRootLayout({
   children: ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, userRole, isLoading } = useSupabase();
+  const { session, role, loading, authenticated } = useSession(); // Use custom session context
   const router = useRouter();
 
   const toggleSidebar = () => {
@@ -23,21 +23,21 @@ export default function AdminRootLayout({
 
   // Role Guard: Redirect non-staff users away from admin area
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
+    if (!loading) {
+      if (!authenticated) {
         router.push('/login');
-      } else if (userRole && !['admin', 'staff', 'manager', 'owner'].includes(userRole)) {
+      } else if (role && !['admin', 'staff', 'manager', 'owner'].includes(role)) {
         // If logged in but not a staff member, redirect to home
         console.warn('Unauthorized access to admin area. Redirecting to home.');
         router.push('/');
       }
     }
-  }, [user, userRole, isLoading, router]);
+  }, [authenticated, role, loading, router]);
 
   // If loading or unauthorized, show a loading/redirecting state
-  const isAuthorized = !isLoading && user && ['admin', 'staff', 'manager', 'owner'].includes(userRole || '');
+  const isAuthorized = !loading && authenticated && ['admin', 'staff', 'manager', 'owner'].includes(role || '');
 
-  if (isLoading || !isAuthorized) {
+  if (loading || !isAuthorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900" suppressHydrationWarning>
         <div className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-blue-500 animate-spin"></div>

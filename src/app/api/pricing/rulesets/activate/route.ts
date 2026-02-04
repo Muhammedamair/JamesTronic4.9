@@ -29,19 +29,19 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { id, version, confirm_text, reason } = body;
+    const { id, confirm_text, reason } = body;
 
-    if (!id || !version || !confirm_text || !reason) {
+    if (!id || !confirm_text || !reason) {
         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    if (confirm_text.trim() !== version) {
-        return NextResponse.json({ error: 'Confirmation text does not match version exactly' }, { status: 400 });
+    if (confirm_text.trim() !== 'ACTIVATE') {
+        return NextResponse.json({ error: 'Confirmation text must be ACTIVATE' }, { status: 400 });
     }
 
     // Transactional activation via RPC (no service-role key here)
-    // Using the authenticated client passes the JWT, allowing the RPC to check auth.uid() and role.
     const { data, error } = await supabase.rpc('activate_pricing_ruleset', {
         p_ruleset_id: id,
+        p_confirm: confirm_text,
         p_reason: reason
     });
 
