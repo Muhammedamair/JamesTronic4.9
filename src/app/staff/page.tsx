@@ -12,6 +12,7 @@ export default function StaffPortalPage() {
 
   useEffect(() => {
     // Mark as client-side after hydration
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
   }, []);
 

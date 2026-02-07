@@ -6,9 +6,7 @@ import { User, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
-interface SettingsPanelProps {
-  // onLogout prop removed since logout is handled in HamburgerMenu
-}
+type SettingsPanelProps = Record<string, never>;
 
 const SettingsPanel: React.FC<SettingsPanelProps> = () => {
   const [darkMode, setDarkMode] = useState(false);

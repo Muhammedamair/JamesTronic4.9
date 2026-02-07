@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,9 +28,8 @@ const StarRating = ({ rating, onRatingChange }: { rating: number; onRatingChange
         <button
           key={star}
           type="button"
-          className={`text-2xl focus:outline-none ${
-            star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
-          }`}
+          className={`text-2xl focus:outline-none ${star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+            }`}
           onClick={() => onRatingChange(star)}
           aria-label={`Rate ${star} stars`}
         >
@@ -72,7 +71,7 @@ export const FeedbackModule = ({ ticket, open, onOpenChange, onSuccess }: Feedba
     try {
       await customerAPI.submitFeedback(ticket.id, rating, review);
       setSubmitted(true);
-      
+
       // Call success callback after a delay
       setTimeout(() => {
         onOpenChange(false);
@@ -122,13 +121,13 @@ export const FeedbackModule = ({ ticket, open, onOpenChange, onSuccess }: Feedba
             Please share your feedback about the repair service for your {ticket.device_category} {ticket.brand && `- ${ticket.brand}`} {ticket.model && `- ${ticket.model}`}.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="text-center">
             <h3 className="font-medium mb-3">How was your experience?</h3>
             <StarRating rating={rating} onRatingChange={setRating} />
           </div>
-          
+
           <div>
             <label htmlFor="review" className="block text-sm font-medium mb-2">
               Additional comments (optional)
@@ -141,23 +140,23 @@ export const FeedbackModule = ({ ticket, open, onOpenChange, onSuccess }: Feedba
               rows={4}
             />
           </div>
-          
+
           {error && (
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           )}
-          
+
           <div className="flex justify-end space-x-2 pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
               Cancel
             </Button>
-            <Button 
-              type="button" 
-              onClick={handleSubmit} 
+            <Button
+              type="button"
+              onClick={handleSubmit}
               disabled={submitting || rating === 0}
             >
               {submitting ? 'Submitting...' : 'Submit Feedback'}
@@ -172,7 +171,14 @@ export const FeedbackModule = ({ ticket, open, onOpenChange, onSuccess }: Feedba
 // Component to automatically prompt for feedback when a ticket is completed/closed
 export const TicketFeedbackPrompt = ({ ticket }: { ticket: Ticket }) => {
   const [open, setOpen] = useState(false);
-  
+
+  // Mock function to check if feedback exists for a ticket
+  const hasSubmittedFeedback = (ticketId: string): boolean => {
+    // In a real implementation, this would check the feedback table
+    // For now, just return false to always show the prompt
+    return false;
+  };
+
   // Show feedback prompt if ticket is completed/closed and user hasn't provided feedback yet
   useEffect(() => {
     if (
@@ -189,17 +195,10 @@ export const TicketFeedbackPrompt = ({ ticket }: { ticket: Ticket }) => {
     }
   }, [ticket]);
 
-  // Mock function to check if feedback exists for a ticket
-  const hasSubmittedFeedback = (ticketId: string): boolean => {
-    // In a real implementation, this would check the feedback table
-    // For now, just return false to always show the prompt
-    return false;
-  };
-
   return (
-    <FeedbackModule 
-      ticket={ticket} 
-      open={open} 
+    <FeedbackModule
+      ticket={ticket}
+      open={open}
       onOpenChange={setOpen}
     />
   );

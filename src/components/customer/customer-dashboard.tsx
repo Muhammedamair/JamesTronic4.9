@@ -27,6 +27,7 @@ export default function CustomerDashboard() {
     window.addEventListener('offline', handleOffline);
 
     // Initial check
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNetworkStatus(navigator.onLine ? 'online' : 'offline');
 
     if (!navigator.onLine) {
@@ -45,6 +46,7 @@ export default function CustomerDashboard() {
       const mostRecent = customerTickets.reduce((prev, current) =>
         new Date(prev.created_at) > new Date(current.created_at) ? prev : current
       );
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedTicket(mostRecent);
     }
   }, [customerTickets, selectedTicket]);
@@ -148,9 +150,8 @@ export default function CustomerDashboard() {
                   customerTickets.map((ticket) => (
                     <div
                       key={ticket.id}
-                      className={`p-4 border rounded-lg cursor-pointer hover:bg-accent transition-colors ${
-                        selectedTicket?.id === ticket.id ? 'bg-primary/5 border-primary' : ''
-                      }`}
+                      className={`p-4 border rounded-lg cursor-pointer hover:bg-accent transition-colors ${selectedTicket?.id === ticket.id ? 'bg-primary/5 border-primary' : ''
+                        }`}
                       onClick={() => setSelectedTicket(ticket)}
                     >
                       <div className="flex justify-between items-center">
@@ -165,12 +166,11 @@ export default function CustomerDashboard() {
                             Created: {new Date(ticket.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          ticket.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        <span className={`px-2 py-1 rounded-full text-xs ${ticket.status === 'completed' ? 'bg-green-100 text-green-800' :
                           ticket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                          ticket.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                            ticket.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                          }`}>
                           {ticket.status.replace('_', ' ')}
                         </span>
                       </div>

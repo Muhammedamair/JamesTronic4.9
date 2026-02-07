@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, Package, User, MessageCircle } from 'lucide-react';
-import { getTrustCopy } from '@/lib/trust/trust-copy';
+import { AlertTriangle, Package, User, MessageCircle } from 'lucide-react';
 import { TrustOrchestrator } from '@/lib/trust/trustOrchestrator';
 
 interface TrustRiskInjectorProps {
@@ -13,10 +11,8 @@ interface TrustRiskInjectorProps {
 }
 
 export const TrustRiskInjector = ({ ticket, className }: TrustRiskInjectorProps) => {
-  const [riskMessage, setRiskMessage] = useState<{type: string, message: string, icon: any} | null>(null);
-
-  useEffect(() => {
-    if (!ticket) return;
+  const riskMessage = useMemo(() => {
+    if (!ticket) return null;
 
     // Use trust orchestration to determine risk message
     const orchestrator = new TrustOrchestrator();
@@ -34,8 +30,8 @@ export const TrustRiskInjector = ({ ticket, className }: TrustRiskInjectorProps)
 
     // Only show risk messages when orchestration indicates risk
     if (orchestrationResult.showTrustIndicator &&
-        orchestrationResult.trustComponentType === 'risk-injector' &&
-        orchestrationResult.trustMessage) {
+      orchestrationResult.trustComponentType === 'risk-injector' &&
+      orchestrationResult.trustMessage) {
 
       let messageType = 'warning';
       let messageIcon = AlertTriangle;
@@ -54,13 +50,13 @@ export const TrustRiskInjector = ({ ticket, className }: TrustRiskInjectorProps)
         messageIcon = User;
       }
 
-      setRiskMessage({
+      return {
         type: messageType,
         message: orchestrationResult.trustMessage,
         icon: messageIcon
-      });
+      };
     } else {
-      setRiskMessage(null);
+      return null;
     }
   }, [ticket]);
 
@@ -71,11 +67,10 @@ export const TrustRiskInjector = ({ ticket, className }: TrustRiskInjectorProps)
   const IconComponent = riskMessage.icon;
 
   return (
-    <Card className={`border-l-4 ${
-      riskMessage.type === 'critical' ? 'border-red-500 bg-red-50/30 dark:bg-red-900/20' :
+    <Card className={`border-l-4 ${riskMessage.type === 'critical' ? 'border-red-500 bg-red-50/30 dark:bg-red-900/20' :
       riskMessage.type === 'warning' ? 'border-yellow-500 bg-yellow-50/30 dark:bg-yellow-900/20' :
-      'border-blue-500 bg-blue-50/30 dark:bg-blue-900/20'
-    } ${className}`}>
+        'border-blue-500 bg-blue-50/30 dark:bg-blue-900/20'
+      } ${className}`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
           <MessageCircle className="w-5 h-5 text-blue-600" />
@@ -84,10 +79,9 @@ export const TrustRiskInjector = ({ ticket, className }: TrustRiskInjectorProps)
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-3">
-          <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-            riskMessage.type === 'critical' ? 'text-red-600' :
+          <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${riskMessage.type === 'critical' ? 'text-red-600' :
             riskMessage.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'
-          }`} />
+            }`} />
           <p className="text-gray-700 dark:text-gray-300">
             {riskMessage.message}
           </p>

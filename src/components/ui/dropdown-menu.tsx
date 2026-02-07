@@ -16,12 +16,14 @@ const DropdownContext = React.createContext<DropdownContextValue | undefined>(un
 const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
     const [isOpen, setIsOpen] = React.useState(false);
 
+    const contextValue = React.useMemo(() => ({ isOpen, setIsOpen }), [isOpen]);
+
     // Close on click outside handling is tricky with composition, 
     // simplified: content usually handles "onInteractOutside" in Radix.
     // Here we rely on content wrapper ref.
 
     return (
-        <DropdownContext.Provider value={{ isOpen, setIsOpen }}>
+        <DropdownContext.Provider value={contextValue}>
             <div className="relative inline-block text-left relative-dropdown-container">
                 {children}
             </div>
@@ -46,9 +48,9 @@ const DropdownMenuTrigger = React.forwardRef<
         // If asChild is true, we clone the child and add onClick
         // This is fragile but works for simple cases like <Button>
         const child: any = React.Children.only(children);
+        // eslint-disable-next-line react-hooks/refs
         return React.cloneElement(child, {
             onClick: handleClick,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ref: ref as any,
             ...props
         });
@@ -79,16 +81,6 @@ const DropdownMenuContent = React.forwardRef<
     // Click outside listener
     React.useEffect(() => {
         if (!ctx.isOpen) return;
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                // Basic check: ensure we didn't click the trigger. 
-                // The container wrapping both catches checking, but here Content is sibling or child.
-                // Actually, the simplest way is to put the ref on the container in DropdownMenu. 
-                // But for this simple impl, we just close if click is strictly outside this content 
-                // AND not on the trigger (which is hard to know here).
-                // Improvement: Add click listener to document, if target is not inside .relative-dropdown-container, close.
-            }
-        };
 
         const handleDocClick = (e: MouseEvent) => {
             const container = dropdownRef.current?.closest('.relative-dropdown-container');
@@ -99,7 +91,7 @@ const DropdownMenuContent = React.forwardRef<
 
         document.addEventListener('mousedown', handleDocClick);
         return () => document.removeEventListener('mousedown', handleDocClick);
-    }, [ctx.isOpen]);
+    }, [ctx, ctx.isOpen]);
 
     if (!ctx.isOpen) return null;
 

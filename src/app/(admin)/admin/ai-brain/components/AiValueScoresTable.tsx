@@ -36,25 +36,12 @@ export function AiValueScoresTable({ refreshTrigger }: AiValueScoresTableProps =
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        fetchScores();
-
-        const supabase = createClient();
-        const channel = supabase
-            .channel('value_scores_realtime')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'value_function_scores',
-            }, () => {
-                fetchScores();
-            })
-            .subscribe();
-
-        return () => {
-            channel.unsubscribe();
-        };
-    }, [searchTerm, refreshTrigger]);
+    // Helper: Supabase might return numeric as string, parse safely
+    const toNum = (v: number | string | null | undefined): number | null => {
+        if (v === null || v === undefined) return null;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    };
 
     async function fetchScores() {
         setLoading(true);
@@ -109,12 +96,28 @@ export function AiValueScoresTable({ refreshTrigger }: AiValueScoresTableProps =
         setLoading(false);
     }
 
-    // Helper: Supabase might return numeric as string, parse safely
-    const toNum = (v: number | string | null | undefined): number | null => {
-        if (v === null || v === undefined) return null;
-        const n = Number(v);
-        return Number.isFinite(n) ? n : null;
-    };
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchScores();
+
+        const supabase = createClient();
+        const channel = supabase
+            .channel('value_scores_realtime')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'value_function_scores',
+            }, () => {
+                fetchScores();
+            })
+            .subscribe();
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [searchTerm, refreshTrigger]);
+
+
 
     function getScoreColor(score: number | null): string {
         const val = score ?? 0;

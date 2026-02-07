@@ -77,7 +77,7 @@ export default function OTPLoginPageWrapper() {
   const sanitizedRedirect = sanitizeRedirect(requestedRedirect);
 
   const contactInputRef = useRef<HTMLInputElement>(null);
-  const otpInputRefs = Array(6).fill(null).map(() => useRef<HTMLInputElement>(null));
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const normalizePhone = (phone: string): string => {
     const digitsOnly = phone.replace(/\D/g, '');
@@ -675,7 +675,7 @@ export default function OTPLoginPageWrapper() {
 
       // Move to next input if digit was entered and not on the last input
       if (value && index < 5) {
-        otpInputRefs[index + 1].current?.focus();
+        otpInputRefs.current[index + 1]?.focus();
       }
     }
   };
@@ -683,7 +683,7 @@ export default function OTPLoginPageWrapper() {
   // Handle backspace to move to previous input
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpInputRefs[index - 1].current?.focus();
+      otpInputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -797,7 +797,7 @@ export default function OTPLoginPageWrapper() {
                     .map((_, index) => (
                       <Input
                         key={index}
-                        ref={otpInputRefs[index]}
+                        ref={(el) => { otpInputRefs.current[index] = el; }}
                         type="tel"
                         inputMode="numeric"
                         maxLength={1}
