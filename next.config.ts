@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
 
 const nextConfig: NextConfig = {
+
+  output: 'standalone',
   serverExternalPackages: ["@supabase/supabase-js"],
   images: {
     remotePatterns: [

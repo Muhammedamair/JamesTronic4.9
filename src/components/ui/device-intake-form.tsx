@@ -112,15 +112,16 @@ const commonIssues = {
 
 interface DeviceIntakeFormProps {
   onSubmit: (formData: any) => void;
+  initialCategory?: string;
 }
 
-const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
+const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit, initialCategory }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
     customerArea: '',
-    deviceCategory: '',
+    deviceCategory: initialCategory || '',
     brand: '',
     model: '',
     size: '',
@@ -257,11 +258,10 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                     <button
                       key={category.id}
                       type="button"
-                      className={`p-4 border rounded-lg flex flex-col items-center justify-center transition-colors ${
-                        formData.deviceCategory === category.id
+                      className={`p-4 border rounded-lg flex flex-col items-center justify-center transition-colors ${formData.deviceCategory === category.id
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300'
                           : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                        }`}
                       onClick={() => handleCategoryChange(category.id)}
                     >
                       <span className="text-xl mb-1">{category.icon}</span>
@@ -308,11 +308,10 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                                 <button
                                   key={brand.id}
                                   type="button"
-                                  className={`p-2 border rounded flex flex-col items-center ${
-                                    formData.brand === brand.id
+                                  className={`p-2 border rounded flex flex-col items-center ${formData.brand === brand.id
                                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
                                       : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                  }`}
+                                    }`}
                                   onClick={() => handleBrandSelect(brand.id)}
                                 >
                                   {renderBrandLogo(brand.id, 'w-8 h-8')}
@@ -384,17 +383,16 @@ const DeviceIntakeForm: React.FC<DeviceIntakeFormProps> = ({ onSubmit }) => {
                             <button
                               key={index}
                               type="button"
-                              className={`block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                                formData.commonIssue === issue ? 'bg-blue-100 dark:bg-blue-900' : ''
-                              }`}
+                              className={`block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${formData.commonIssue === issue ? 'bg-blue-100 dark:bg-blue-900' : ''
+                                }`}
                               onClick={() => handleCommonIssueSelect(issue)}
                             >
                               {issue}
                             </button>
                           ))
-                        : (
-                          <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No common issues available for this category</div>
-                        )}
+                          : (
+                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No common issues available for this category</div>
+                          )}
                       </div>
                     </div>
                   )}

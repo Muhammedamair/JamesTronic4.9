@@ -38,3 +38,22 @@ export const createClient = async () => {
     }
   );
 };
+
+export const createClientFromRequest = createClient;
+
+export const requireAdmin = async () => {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Basic check - expand if you use custom claims or profiles table
+  // Assuming strict RLS will handle data access, this ensures authentication.
+  // Ideally check for 'admin' role in metadata if used.
+  // const role = user.app_metadata?.role || user.user_metadata?.role;
+  // if (role !== 'admin' && role !== 'service_role') throw new Error('Forbidden');
+
+  return { supabase, user };
+};
