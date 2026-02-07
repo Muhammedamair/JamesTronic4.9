@@ -2,9 +2,31 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { SessionManager } from '@/lib/auth-system/sessionManager';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
+// Canonical domain for production
+const CANONICAL_HOST = 'jamestronic.com';
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // === CANONICAL HOST REDIRECT (defense-in-depth) ===
+  // Only enforce in Vercel Production environment
+  if (process.env.VERCEL_ENV === 'production') {
+    const host = request.headers.get('host') || '';
+
+    // Allow canonical apex and www (www redirects at Vercel layer)
+    const isCanonical = host === CANONICAL_HOST || host === `www.${CANONICAL_HOST}`;
+
+    // Only redirect non-canonical hosts, skip API routes
+    if (!isCanonical && !pathname.startsWith('/api')) {
+      const url = request.nextUrl.clone();
+      url.hostname = CANONICAL_HOST;
+      url.protocol = 'https:';
+      url.port = '';
+      return NextResponse.redirect(url, 307);
+    }
+  }
+
+  // Skip remaining checks for API routes
   if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
@@ -15,7 +37,7 @@ export async function middleware(request: NextRequest) {
   if (!validationResponse.valid) {
     // If session is invalid, check if we can refresh it
     if (validationResponse.error &&
-        (validationResponse.error.includes('expired') || validationResponse.error.includes('Session not found'))) {
+      (validationResponse.error.includes('expired') || validationResponse.error.includes('Session not found'))) {
       try {
         const refreshResponse = await SessionManager.refreshSession();
         if (!refreshResponse.success) {
@@ -38,12 +60,12 @@ export async function middleware(request: NextRequest) {
     if (!validationResponse.valid) {
       // Define public routes (no authentication required)
       const isPublicRoute = request.nextUrl.pathname === '/' ||
-                           request.nextUrl.pathname === '/api/auth/callback' ||
-                           request.nextUrl.pathname.startsWith('/auth/') ||
-                           request.nextUrl.pathname.startsWith('/api/otp') ||
-                           request.nextUrl.pathname.startsWith('/api/webhook') ||
-                           request.nextUrl.pathname.startsWith('/login') ||
-                           request.nextUrl.pathname.startsWith('/admin/login');
+        request.nextUrl.pathname === '/api/auth/callback' ||
+        request.nextUrl.pathname.startsWith('/auth/') ||
+        request.nextUrl.pathname.startsWith('/api/otp') ||
+        request.nextUrl.pathname.startsWith('/api/webhook') ||
+        request.nextUrl.pathname.startsWith('/login') ||
+        request.nextUrl.pathname.startsWith('/admin/login');
 
       if (isPublicRoute) {
         return NextResponse.next();
@@ -52,7 +74,7 @@ export async function middleware(request: NextRequest) {
       // For protected routes, redirect to appropriate login
       // For admin routes, redirect to admin login
       if (request.nextUrl.pathname.startsWith('/admin') ||
-          request.nextUrl.pathname.startsWith('/app')) {
+        request.nextUrl.pathname.startsWith('/app')) {
         const url = request.nextUrl.clone();
         url.pathname = '/admin/login';
         return NextResponse.redirect(url);
@@ -82,7 +104,7 @@ export async function middleware(request: NextRequest) {
   if (resolvedRole === 'technician' || resolvedRole === 'transporter') {
     // Get device fingerprint from request headers or cookies
     const deviceFingerprint = request.headers.get('x-device-fingerprint') ||
-                              request.cookies.get('device_fingerprint')?.value;
+      request.cookies.get('device_fingerprint')?.value;
 
     if (!deviceFingerprint) {
       // If no device fingerprint is provided, block access for technicians and transporters
@@ -118,7 +140,7 @@ export async function middleware(request: NextRequest) {
         // Device mismatch - potential conflict
         // Log the device conflict
         const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                        request.headers.get('x-real-ip') || 'unknown';
+          request.headers.get('x-real-ip') || 'unknown';
         const userAgent = request.headers.get('user-agent') || 'unknown';
 
         const { error: conflictError } = await supabase
