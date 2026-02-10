@@ -9,6 +9,7 @@
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "prepush:gates": "bash scripts/prepush_gates.sh",
+    "verify:pwa": "bash scripts/verify_pwa_integrity.sh",
     "danger": "danger ci"
   },
   "dependencies": {
