@@ -58,6 +58,10 @@ jobs:
         run: npm run verify:pwa
         shell: bash
 
+      - name: Scaling Compliance Gate
+        run: npm run verify:scaling
+        shell: bash
+
       - name: Check for unused imports
         run: |
           npm install -g @babel/parser @babel/traverse

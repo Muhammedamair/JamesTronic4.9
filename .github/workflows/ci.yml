@@ -47,6 +47,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: PWA Integrity Gate
+        run: npm run verify:pwa
+        shell: bash
+
+      - name: Scaling Compliance Gate
+        run: npm run verify:scaling
+        shell: bash
+
   c19_phase5_gates:
     name: C19 Phase 5 Gates
     runs-on: ubuntu-latest
