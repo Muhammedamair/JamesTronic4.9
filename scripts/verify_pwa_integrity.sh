@@ -75,7 +75,7 @@ const required = ['name', 'short_name', 'start_url', 'icons'];
 let ok = true;
 for (const k of required) {
   if (!(k in data)) {
-    console.error(`  ❌ manifest.json missing required key: ${k}`);
+    console.error(`  ❌ manifest.json missing required field: ${k}`);
     ok = false;
   }
 }
@@ -97,7 +97,7 @@ if (Array.isArray(data.icons) && data.icons.length > 0) {
 }
 
 if (ok) {
-  console.log('  ✅ manifest.json required keys present');
+  console.log('  ✅ manifest.json required fields present');
 } else {
   process.exit(1);
 }
