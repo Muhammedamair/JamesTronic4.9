@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit",
     "prepush:gates": "bash scripts/prepush_gates.sh",
     "verify:pwa": "bash scripts/verify_pwa_integrity.sh",
+    "verify:scaling": "bash scripts/verify_scaling.sh",
     "danger": "danger ci"
   },
   "dependencies": {
