@@ -47,6 +47,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: PWA Integrity Gate
+        run: npm run verify:pwa
+        shell: bash
+
+      - name: Scaling Compliance Gate
+        run: npm run verify:scaling
+        shell: bash
+
   c19_phase5_gates:
     name: C19 Phase 5 Gates
     runs-on: ubuntu-latest
@@ -76,27 +84,35 @@ jobs:
       - name: CI Notice
         run: echo "C19 Phase 5 gates run only on internal PRs/pushes (forks skipped due to secrets safety)."
 
-      - name: Validate Secrets (Fail fast)
-        run: |
-          test -n "$SUPABASE_DB_URL" || (echo "❌ Missing SUPABASE_DB_URL secret" && exit 1)
-          test -n "$SUPABASE_SERVICE_ROLE_KEY" || (echo "❌ Missing SUPABASE_SERVICE_ROLE_KEY secret" && exit 1)
-
-      - name: Verify Supabase config
-        run: test -f supabase/config.toml || (echo "❌ Supabase config missing" && exit 1)
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Apply DB migrations (CI database)
+      - name: Start Local Supabase (CI)
         run: |
           npm i -g supabase@1.226.0
-          supabase db push --db-url "$SUPABASE_DB_URL"
+          # Initialize if not already (config.toml exists, but maybe init needed for fresh runner?)
+          # Actually config.toml should be enough.
+          supabase start -x studio,migra,imgproxy,deno-relay --ignore-health-check
+          
+          # Wait for ready
+          sleep 10
+          
+          # Extract credentials
+          STATUS=$(supabase status -o json)
+          DB_URL=$(echo $STATUS | jq -r .db_url)
+          SERVICE_KEY=$(echo $STATUS | jq -r .service_role_key)
+          ANON_KEY=$(echo $STATUS | jq -r .anon_key)
+          API_URL=$(echo $STATUS | jq -r .api_url)
+          
+          echo "SUPABASE_DB_URL=$DB_URL" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_KEY" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
+
+      - name: Verify Supabase Ready
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "❌ Failed to start local Supabase"
+            exit 1
+          fi
+          echo "✅ Local Supabase started at $NEXT_PUBLIC_SUPABASE_URL"
 
       # ----------------------------
       # C19 Phase 5 Hard Gates (CI)

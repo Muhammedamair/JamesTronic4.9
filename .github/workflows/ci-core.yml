@@ -54,29 +54,13 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
 
-      - name: Service worker validation
-        run: |
-          if [ ! -f public/sw.js ]; then
-            echo "Service worker not found!"
-            exit 1
-          fi
-          echo "✓ Service worker found at public/sw.js"
-          if grep -q "self\.__WB_MANIFEST" public/sw.js; then
-            echo "✓ Service worker contains pre-cache manifest"
-          else
-            echo "⚠ Service worker may lack proper pre-caching"
-          fi
+      - name: PWA Integrity Gate
+        run: npm run verify:pwa
+        shell: bash
 
-      - name: PWA manifest validation
-        run: |
-          if [ ! -f public/manifest.json ]; then
-            echo "PWA manifest not found!"
-            exit 1
-          fi
-          echo "✓ PWA manifest found at public/manifest.json"
-          # Verify manifest structure
-          npm install -g ajv-cli
-          npx ajv validate -s node_modules/@apidevtools/swagger-parser/test/fixtures/refs/manifest.schema.json -d public/manifest.json || echo "Manifest validation skipped"
+      - name: Scaling Compliance Gate
+        run: npm run verify:scaling
+        shell: bash
 
       - name: Check for unused imports
         run: |

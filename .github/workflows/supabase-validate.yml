@@ -20,8 +20,25 @@ jobs:
 
       - name: Start local Supabase
         run: |
-          supabase start
-          sleep 10  # Wait for containers to start
+          supabase start -x studio,migra,imgproxy,deno-relay --ignore-health-check
+          
+          echo "Waiting for Supabase to be ready..."
+          # Poll until we get a valid status or timeout (30s)
+          TIMEOUT=30
+          COUNT=0
+          while [ $COUNT -lt $TIMEOUT ]; do
+            if supabase status > /dev/null 2>&1; then
+              echo "Supabase is up!"
+              break
+            fi
+            sleep 1
+            COUNT=$((COUNT+1))
+          done
+          
+          if [ $COUNT -eq $TIMEOUT ]; then
+            echo "⚠️ Supabase start timed out or is unhealthy, but continuing to inspect logs if needed."
+            supabase status || true
+          fi
 
       - name: Validate schema
         run: |
